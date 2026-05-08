@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GameVerse – Game Detail</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f0f7;--white:#fff;
+  --accent:#5b4fff;--accent2:#7c6bff;--accent-light:#edeaff;
+  --dark:#0d0d14;--text:#111;--sub:#555;--muted:#999;
+  --border:rgba(91,79,255,.12);--border2:rgba(91,79,255,.28);
+  --shadow:0 4px 24px rgba(80,60,200,.08);
+  --shadow-hover:0 20px 60px rgba(80,60,200,.16);
+  --r:20px;
+}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ── AMBIENT BG ── */
+.bg-blobs{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);}
+.blob.a{width:750px;height:750px;top:-280px;left:-180px;background:radial-gradient(circle,rgba(180,160,255,.2),transparent 70%);animation:blobD 14s ease-in-out infinite alternate;}
+.blob.b{width:500px;height:500px;bottom:-160px;right:-80px;background:radial-gradient(circle,rgba(140,200,255,.15),transparent 70%);animation:blobD 11s ease-in-out infinite alternate-reverse;}
+.blob.c{width:380px;height:380px;top:55%;left:60%;background:radial-gradient(circle,rgba(200,160,255,.12),transparent 70%);animation:blobD 16s ease-in-out infinite alternate;animation-delay:-6s;}
+@keyframes blobD{0%{transform:translate(0,0)scale(1);}100%{transform:translate(24px,-32px)scale(1.06);}}
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(91,79,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(91,79,255,.04) 1px,transparent 1px);
+  background-size:48px 48px;animation:gridMove 22s linear infinite;}
+@keyframes gridMove{to{background-position:48px 48px;}}
+.scanline{position:fixed;left:0;right:0;height:1.5px;z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(91,79,255,.28),rgba(124,107,255,.5),rgba(91,79,255,.28),transparent);
+  animation:scanV 7s ease-in-out infinite;}
+@keyframes scanV{0%{top:0%;opacity:0;}5%{opacity:1;}95%{opacity:1;}100%{top:100%;opacity:0;}}
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.particle{position:absolute;border-radius:50%;animation:pUp linear infinite;}
+@keyframes pUp{0%{transform:translateY(0)scale(1);opacity:.7;}100%{transform:translateY(-100px)scale(.3);opacity:0;}}
+.scroll-bar-wrap{position:fixed;top:72px;left:0;right:0;height:2px;z-index:300;}
+.scroll-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .05s;}
+
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 60px;height:72px;
+  background:rgba(240,240,247,.92);backdrop-filter:blur(20px) saturate(160%);
+  border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;
+  box-shadow:0 2px 20px rgba(80,60,180,.06);}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:900;text-decoration:none;color:var(--dark);}
+.logo em{color:var(--accent2);font-style:normal;}
+.nav-links{display:flex;gap:44px;list-style:none;}
+.nav-links a{text-decoration:none;color:var(--sub);font-weight:500;font-size:1rem;transition:color .2s;position:relative;padding-bottom:4px;}
+.nav-links a:hover{color:var(--accent);}
+.nav-links li.active a{font-weight:700;color:var(--accent);}
+.nav-links li.active a::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--accent);}
+.btn-nav{background:var(--dark);color:#fff;border:none;border-radius:50px;padding:12px 26px;font-family:'Barlow',sans-serif;font-size:.9rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s,transform .15s;}
+.btn-nav:hover{background:var(--accent);transform:translateY(-1px);}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{position:relative;z-index:2;padding:18px 60px 0;display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--muted);font-weight:500;animation:fadeUp .4s ease both;}
+.breadcrumb a{color:var(--accent);text-decoration:none;font-weight:600;transition:opacity .2s;}
+.breadcrumb a:hover{opacity:.7;}
+.bc-sep{opacity:.35;}
+
+/* ══════════════════════════
+   HERO SPLIT LAYOUT
+══════════════════════════ */
+.detail-hero{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:520px 1fr;
+  gap:56px;align-items:start;
+  padding:36px 60px 50px;
+}
+
+/* LEFT column */
+.img-col{animation:fadeUp .55s .05s ease both;}
+
+.img-frame{
+  position:relative;border-radius:22px;overflow:hidden;
+  box-shadow:0 16px 60px rgba(91,79,255,.2),0 0 0 1.5px rgba(91,79,255,.18);
+  background:linear-gradient(135deg,#e4e0f8,#ccc8ee);
+  aspect-ratio:16/9;
+}
+.img-frame img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform .5s ease;}
+.img-frame:hover img{transform:scale(1.035);}
+.img-frame::before,.img-frame::after{content:'';position:absolute;z-index:5;pointer-events:none;width:22px;height:22px;border-color:var(--accent);border-style:solid;}
+.img-frame::before{top:10px;left:10px;border-width:2px 0 0 2px;border-radius:3px 0 0 0;}
+.img-frame::after{bottom:10px;right:10px;border-width:0 2px 2px 0;border-radius:0 0 3px 0;}
+.img-scan{position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:linear-gradient(to bottom,transparent 0%,rgba(91,79,255,.05) 50%,transparent 100%);
+  animation:imgScan 3.5s ease-in-out infinite;}
+@keyframes imgScan{0%,100%{transform:translateY(-100%);}50%{transform:translateY(100%);}}
+.img-overlay{position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(255,255,255,.5) 0%,transparent 35%);}
+.img-rank-badge{
+  position:absolute;top:12px;left:12px;z-index:6;
+  font-family:'Barlow Condensed',sans-serif;font-size:.82rem;font-weight:900;letter-spacing:.05em;
+  padding:5px 13px;border-radius:8px;backdrop-filter:blur(8px);
+  background:rgba(255,255,255,.88);border:1.5px solid rgba(91,79,255,.22);color:var(--accent);
+}
+.img-rank-badge.gold{background:linear-gradient(135deg,#f5c842,#e0a800);color:#07070f;border:none;box-shadow:0 4px 16px rgba(245,200,66,.5);}
+.img-rank-badge.silver{background:linear-gradient(135deg,#d4d4e8,#9ea0b8);color:#1a1a2e;border:none;}
+.img-rank-badge.bronze{background:linear-gradient(135deg,#cd7f32,#a0521a);color:#fff;border:none;}
+.img-genre{position:absolute;top:12px;right:12px;z-index:6;background:rgba(255,255,255,.88);backdrop-filter:blur(8px);border:1px solid rgba(91,79,255,.2);color:var(--accent);font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border-radius:6px;}
+
+/* 4 stat tiles */
+.stat-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;}
+.stat-tile{background:var(--white);border:1.5px solid rgba(91,79,255,.1);border-radius:14px;padding:14px 8px;text-align:center;box-shadow:var(--shadow);transition:border-color .25s,transform .25s,box-shadow .25s;animation:fadeUp .5s ease both;cursor:default;}
+.stat-tile:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:var(--shadow-hover);}
+.st-val{font-family:'Barlow Condensed',sans-serif;font-size:1.4rem;font-weight:900;color:var(--accent);line-height:1;}
+.st-lbl{font-size:.58rem;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:4px;}
+
+/* media thumbs strip */
+.media-strip{display:flex;gap:8px;margin-top:12px;overflow-x:auto;padding-bottom:4px;}
+.media-strip::-webkit-scrollbar{height:3px;}
+.media-strip::-webkit-scrollbar-thumb{background:rgba(91,79,255,.2);border-radius:4px;}
+.media-thumb{flex-shrink:0;width:90px;height:54px;border-radius:8px;overflow:hidden;border:1.5px solid rgba(91,79,255,.12);cursor:pointer;transition:border-color .2s,transform .2s;}
+.media-thumb:hover{border-color:var(--accent);transform:scale(1.04);}
+.media-thumb img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+
+/* RIGHT column */
+.info-col{animation:fadeUp .55s .12s ease both;}
+.rank-chip{display:inline-flex;align-items:center;gap:8px;background:var(--accent-light);border:1.5px solid rgba(91,79,255,.28);border-radius:50px;padding:5px 16px;font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;}
+.rc-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:rcPulse 1.8s infinite;}
+@keyframes rcPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.5);}}
+.game-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(2.2rem,4vw,3.6rem);font-weight:900;line-height:.93;letter-spacing:-.02em;color:var(--dark);margin-bottom:10px;}
+.game-byline{font-size:.88rem;color:var(--sub);margin-bottom:16px;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.byline-dev{color:var(--accent);font-weight:700;}
+.byline-sep{opacity:.35;}
+
+/* star rating */
+.star-row{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.stars{display:flex;gap:1px;}
+.star{font-size:1.05rem;}
+.star.filled{color:#f59e0b;}
+.star.empty{color:#ddd;}
+.rating-num{font-family:'Barlow Condensed',sans-serif;font-size:1.35rem;font-weight:900;color:var(--dark);}
+.rating-max{font-size:.78rem;color:var(--muted);font-weight:500;}
+.rating-label{font-size:.7rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:3px 10px;border-radius:20px;border:1px solid rgba(91,79,255,.18);}
+
+.info-divider{height:1px;background:linear-gradient(90deg,rgba(91,79,255,.18),transparent);margin:18px 0;}
+.sec-label{font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.sec-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(91,79,255,.1),transparent);}
+
+/* platforms */
+.platforms-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;}
+.plat-badge{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:50px;font-family:'DM Mono',monospace;font-size:.7rem;font-weight:500;letter-spacing:.05em;text-transform:uppercase;transition:transform .2s,box-shadow .2s;cursor:default;}
+.plat-badge:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.08);}
+.pb-dot{width:6px;height:6px;border-radius:50%;}
+
+/* tags */
+.tags-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;}
+.tag{padding:5px 13px;border-radius:50px;font-size:.73rem;font-weight:600;color:var(--sub);background:var(--white);border:1.5px solid rgba(91,79,255,.13);transition:all .2s;cursor:default;}
+.tag:hover{background:var(--accent-light);border-color:rgba(91,79,255,.3);color:var(--accent);}
+
+/* score + overview */
+.score-section{display:flex;align-items:flex-start;gap:18px;margin-bottom:20px;}
+.score-ring-wrap{flex-shrink:0;}
+.score-ring-svg{width:78px;height:78px;}
+.sr-track{fill:none;stroke:rgba(91,79,255,.1);stroke-width:6;}
+.sr-fill{fill:none;stroke-width:6;stroke-linecap:round;stroke-dasharray:213;transform:rotate(-90deg);transform-origin:39px 39px;transition:stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1) .35s;}
+.sr-text{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;}
+.sr-sub{font-size:7.5px;font-weight:600;}
+.score-desc p{font-size:.9rem;color:var(--sub);line-height:1.65;font-weight:400;}
+
+/* CTA */
+.cta-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;}
+.btn-primary{display:flex;align-items:center;gap:8px;background:var(--dark);color:#fff;border:none;border-radius:50px;padding:13px 28px;font-family:'Barlow',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;text-decoration:none;transition:background .2s,transform .15s,box-shadow .2s;box-shadow:0 6px 24px rgba(13,13,20,.18);}
+.btn-primary:hover{background:var(--accent);transform:translateY(-2px);box-shadow:0 10px 32px rgba(91,79,255,.4);}
+.btn-secondary{display:flex;align-items:center;gap:8px;background:var(--white);color:var(--accent);border:2px solid rgba(91,79,255,.22);border-radius:50px;padding:11px 24px;font-family:'Barlow',sans-serif;font-size:.92rem;font-weight:700;cursor:pointer;text-decoration:none;transition:all .2s;box-shadow:0 4px 14px rgba(91,79,255,.07);}
+.btn-secondary:hover{background:var(--accent);color:#fff;border-color:var(--accent);transform:translateY(-2px);}
+
+/* ══════════════════════════
+   DEEP INFO SECTIONS
+══════════════════════════ */
+.sections-wrap{position:relative;z-index:2;padding:0 60px 20px;}
+
+.info-section{background:var(--white);border:1.5px solid rgba(91,79,255,.1);border-radius:var(--r);padding:30px 32px;margin-bottom:16px;box-shadow:var(--shadow);animation:fadeUp .5s ease both;transition:border-color .3s,box-shadow .3s;}
+.info-section:hover{border-color:rgba(91,79,255,.2);box-shadow:var(--shadow-hover);}
+.is-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.is-icon{width:38px;height:38px;border-radius:10px;background:var(--accent-light);border:1.5px solid rgba(91,79,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.is-title{font-family:'Barlow Condensed',sans-serif;font-size:1.25rem;font-weight:900;color:var(--dark);letter-spacing:-.01em;}
+
+/* ── STORY / OVERVIEW ── */
+.story-text{font-size:.93rem;color:var(--sub);line-height:1.75;font-weight:400;}
+.story-text p{margin-bottom:14px;}
+.story-text p:last-child{margin-bottom:0;}
+
+/* ── GAMEPLAY FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.feature-card{background:linear-gradient(135deg,rgba(91,79,255,.04),rgba(91,79,255,.01));border:1.5px solid rgba(91,79,255,.1);border-radius:14px;padding:16px;transition:all .2s;cursor:default;}
+.feature-card:hover{border-color:rgba(91,79,255,.25);background:linear-gradient(135deg,rgba(91,79,255,.07),rgba(91,79,255,.02));transform:translateY(-2px);}
+.fc-icon{font-size:1.4rem;margin-bottom:8px;}
+.fc-title{font-family:'Barlow Condensed',sans-serif;font-size:.95rem;font-weight:800;color:var(--dark);margin-bottom:4px;letter-spacing:-.01em;}
+.fc-desc{font-size:.76rem;color:var(--sub);line-height:1.5;}
+
+/* ── SCORES TABLE ── */
+.scores-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.score-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1.5px solid rgba(91,79,255,.1);border-radius:12px;background:rgba(91,79,255,.02);transition:all .2s;}
+.score-item:hover{border-color:rgba(91,79,255,.22);background:rgba(91,79,255,.04);}
+.si-label{font-size:.78rem;font-weight:700;color:var(--sub);flex:1;}
+.si-bar-wrap{flex:2;height:5px;background:rgba(91,79,255,.1);border-radius:10px;overflow:hidden;}
+.si-bar{height:100%;border-radius:10px;transition:width 1s cubic-bezier(.4,0,.2,1) .4s;}
+.si-num{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:900;color:var(--accent);min-width:36px;text-align:right;}
+
+/* ── CRITIC REVIEWS ── */
+.reviews-list{display:flex;flex-direction:column;gap:12px;}
+.review-card{padding:18px 20px;border:1.5px solid rgba(91,79,255,.1);border-radius:14px;background:rgba(91,79,255,.02);transition:all .2s;}
+.review-card:hover{border-color:rgba(91,79,255,.2);background:rgba(91,79,255,.04);}
+.rv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.rv-outlet{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:900;color:var(--dark);}
+.rv-score{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:900;color:var(--accent);background:var(--accent-light);padding:3px 12px;border-radius:20px;border:1px solid rgba(91,79,255,.2);}
+.rv-reviewer{font-size:.72rem;color:var(--muted);font-weight:500;margin-bottom:8px;}
+.rv-text{font-size:.85rem;color:var(--sub);line-height:1.6;font-style:italic;}
+.rv-stars{color:#f59e0b;font-size:.8rem;margin-top:8px;}
+
+/* ── AWARDS ── */
+.awards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.award-badge{display:flex;flex-direction:column;align-items:center;text-align:center;padding:18px 12px;border:1.5px solid rgba(91,79,255,.1);border-radius:14px;background:linear-gradient(135deg,rgba(91,79,255,.03),rgba(91,79,255,.01));transition:all .2s;cursor:default;}
+.award-badge:hover{border-color:rgba(91,79,255,.25);transform:translateY(-3px);box-shadow:0 8px 24px rgba(91,79,255,.12);}
+.aw-icon{font-size:1.8rem;margin-bottom:8px;}
+.aw-title{font-family:'Barlow Condensed',sans-serif;font-size:.88rem;font-weight:900;color:var(--dark);line-height:1.2;margin-bottom:4px;}
+.aw-org{font-size:.68rem;color:var(--muted);font-weight:600;letter-spacing:.05em;}
+
+/* ── SYSTEM REQUIREMENTS ── */
+.sysreq-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sysreq-col{padding:18px 20px;border:1.5px solid rgba(91,79,255,.1);border-radius:14px;background:rgba(91,79,255,.02);}
+.sysreq-type{font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:900;color:var(--dark);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.sysreq-type .badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.06em;}
+.badge-min{background:#fde8e8;color:#c81e1e;}
+.badge-rec{background:#e8fdf0;color:#057a55;}
+.sysreq-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:.8rem;}
+.sysreq-row:last-child{margin-bottom:0;}
+.sr-key{font-weight:700;color:var(--sub);min-width:75px;flex-shrink:0;}
+.sr-val{color:var(--text);font-weight:500;line-height:1.4;}
+
+/* ── DID YOU KNOW ── */
+.trivia-list{display:flex;flex-direction:column;gap:10px;}
+.trivia-item{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border:1.5px solid rgba(91,79,255,.1);border-radius:12px;background:rgba(91,79,255,.02);transition:all .2s;}
+.trivia-item:hover{border-color:rgba(91,79,255,.2);background:rgba(91,79,255,.04);}
+.ti-num{font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:900;color:var(--accent);opacity:.4;flex-shrink:0;min-width:24px;}
+.ti-text{font-size:.85rem;color:var(--sub);line-height:1.6;}
+
+/* ── SIMILAR GAMES ── */
+.related-section{position:relative;z-index:2;padding:0 60px 80px;}
+.rel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.rel-title{font-family:'Barlow Condensed',sans-serif;font-size:1.7rem;font-weight:900;color:var(--dark);letter-spacing:-.01em;}
+.rel-see-all{font-size:.82rem;font-weight:700;color:var(--accent);text-decoration:none;transition:opacity .2s;}
+.rel-see-all:hover{opacity:.7;}
+.related-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.rel-card{background:var(--white);border-radius:16px;border:1.5px solid rgba(91,79,255,.1);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s;animation:fadeUp .4s ease both;}
+.rel-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-hover);border-color:rgba(91,79,255,.28);}
+.rel-img{height:110px;overflow:hidden;background:linear-gradient(135deg,#e8e4f8,#d4d0f0);position:relative;}
+.rel-img img{width:100%;height:100%;object-fit:cover;object-position:center top;transition:transform .4s ease;}
+.rel-card:hover .rel-img img{transform:scale(1.08);}
+.rel-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(255,255,255,.7) 0%,transparent 50%);}
+.rel-body{padding:12px 14px 14px;}
+.rel-rank{font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;}
+.rel-name{font-family:'Barlow Condensed',sans-serif;font-size:.98rem;font-weight:900;color:var(--dark);line-height:1.2;margin-bottom:5px;}
+.rel-meta{display:flex;align-items:center;gap:6px;}
+.rel-genre{font-size:.63rem;font-weight:700;color:var(--accent);background:var(--accent-light);padding:2px 8px;border-radius:20px;}
+.rel-year{font-size:.63rem;font-weight:600;color:var(--muted);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ── NOT FOUND ── */
+.not-found{position:relative;z-index:2;text-align:center;padding:120px 60px;animation:fadeIn .5s ease both;}
+.not-found h2{font-family:'Barlow Condensed',sans-serif;font-size:2.4rem;font-weight:900;color:var(--dark);margin-bottom:12px;}
+.not-found p{color:var(--sub);margin-bottom:28px;}
+
+/* section delay stagger */
+.info-section:nth-child(1){animation-delay:.05s}
+.info-section:nth-child(2){animation-delay:.1s}
+.info-section:nth-child(3){animation-delay:.15s}
+.info-section:nth-child(4){animation-delay:.2s}
+.info-section:nth-child(5){animation-delay:.25s}
+.info-section:nth-child(6){animation-delay:.3s}
+.info-section:nth-child(7){animation-delay:.35s}
+
+@media(max-width:960px){
+  nav{padding:0 20px;}
+  .nav-links{display:none;}
+  .detail-hero{grid-template-columns:1fr;gap:28px;padding:20px 20px 36px;}
+  .breadcrumb,.sections-wrap,.related-section{padding-left:20px;padding-right:20px;}
+  .stat-tiles{grid-template-columns:repeat(2,1fr);}
+  .features-grid,.awards-grid{grid-template-columns:repeat(2,1fr);}
+  .sysreq-grid,.scores-grid{grid-template-columns:1fr;}
+  .related-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-blobs"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+<div class="bg-grid"></div>
+<div class="scanline"></div>
+<div class="particles" id="particles"></div>
+<div class="scroll-bar-wrap"><div class="scroll-bar" id="scrollBar"></div></div>
+
+<nav>
+  <a href="index.html" class="logo">GAME<em>VERSE</em></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="active"><a href="games.html">Games</a></li>
+    <li><a href="#">Platforms</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <a href="games.html" class="btn-nav" style="text-decoration:none">Explore Games</a>
+</nav>
+
+<div class="breadcrumb" id="breadcrumb">
+  <a href="index.html">Home</a><span class="bc-sep">›</span>
+  <a href="games.html">Games</a><span class="bc-sep">›</span>
+  <span id="bc-title">Loading…</span>
+</div>
+
+<div id="mainContent"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   FULL GAME DATABASE — all 30 games, richly detailed
+══════════════════════════════════════════════════════════ */
+const GAMES = {
+
+'gta5':{rank:1,title:'Grand Theft Auto V',dev:'Rockstar Games',publisher:'Rockstar Games',year:2013,genre:'Action',subgenre:'Open World',rating:9.8,score:98,
+  platforms:['PS','Xbox','PC'],
+  img:'https://wallpapercave.com/wp/wp1809630.jpg',
+  tags:['Open World','Crime','Story Rich','Multiplayer','Sandbox','Heist','Dark Humor','Vehicles'],
+  overview:`Grand Theft Auto V is Rockstar Games' crowning achievement — a staggering open-world crime epic set in the sprawling, sun-drenched metropolis of Los Santos, a fictional analogue to Los Angeles. It follows three protagonists across a gripping heist-driven narrative: Michael, a retired bank robber living a hollow suburban life; Trevor, his unhinged former partner; and Franklin, an ambitious street hustler looking for his break.
+
+  The game's world — the largest in the GTA series — is a living, breathing ecosystem of detail. From the urban sprawl of downtown Los Santos to the wilderness of Blaine County, every inch is crafted with obsessive care. Online mode launched as an extension of the base game and evolved into a cultural phenomenon, generating billions in revenue and sustaining a dedicated player base for over a decade.
+
+  GTA V redefined expectations for open-world design with its seamless protagonist-switching, dynamic weather, and extraordinary density of activities. It remains the third best-selling video game of all time.`,
+  features:[
+    {icon:'🎭',title:'Three Protagonists',desc:'Switch between Michael, Trevor, and Franklin at will — each with unique abilities and story arcs.'},
+    {icon:'🌆',title:'Los Santos',desc:'A massive, meticulously detailed city modeled on Los Angeles with dozens of distinct neighborhoods.'},
+    {icon:'💰',title:'Heist Missions',desc:'Elaborate multi-stage heist missions requiring careful planning, crew selection, and execution.'},
+    {icon:'🎮',title:'GTA Online',desc:'Persistent multiplayer world supporting up to 30 players with hundreds of missions and activities.'},
+    {icon:'🚗',title:'100+ Vehicles',desc:'Hundreds of land, sea, and air vehicles ranging from motorcycles to fighter jets.'},
+    {icon:'📺',title:'In-Game Media',desc:'Three full radio stations, a mock TV network, and a satirical internet all within the game world.'},
+  ],
+  scores:[
+    {label:'Metacritic (PS5)',val:97,color:'#5b4fff'},{label:'OpenCritic',val:96,color:'#7c6bff'},
+    {label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},
+    {label:'Eurogamer',val:95,color:'#10b981'},{label:'GamesRadar',val:100,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'IGN',score:'10/10',reviewer:'Keza MacDonald',text:'GTA V is one of the best games ever made. It is huge and varied in its pleasures, sophisticated in its storytelling, and almost overwhelmingly detailed in its recreation of modern American life.'},
+    {outlet:'GameSpot',score:'9/10',reviewer:'Carolyn Petit',text:'Rockstar Games has created something that most developers can only dream of — a world so vast and so full of things to do that you could easily sink hundreds of hours into it and still discover something new.'},
+    {outlet:'Eurogamer',score:'10/10',reviewer:'Tom Bramwell',text:'One of the most extraordinary games ever created. Grand Theft Auto V is a benchmark for open-world design and technical achievement that will be studied and referenced for decades.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Game of the Year',org:'BAFTA 2014'},
+    {icon:'🌟',title:'Outstanding Achievement',org:'DICE Awards 2014'},
+    {icon:'🎮',title:'Best Open World Game',org:'Game Critics Awards'},
+    {icon:'🎬',title:'Best Narrative',org:'Writers Guild Awards'},
+    {icon:'🎵',title:'Best Soundtrack',org:'IGN Best Of 2013'},
+    {icon:'💡',title:'Technical Achievement',org:'GDC Awards 2014'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 10 64-bit',CPU:'Intel Core i5 3470 / AMD X8 FX-8350',RAM:'8 GB',GPU:'NVIDIA GTX 660 2GB / AMD HD 7870 2GB',Storage:'72 GB'},
+    rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7 4770K / AMD Ryzen 5 3600',RAM:'16 GB',GPU:'NVIDIA RTX 2060 / AMD RX 5700',Storage:'72 GB SSD'},
+  },
+  trivia:[
+    'GTA V has generated over $8 billion in revenue — making it one of the most profitable entertainment products in history.',
+    'The game world covers 49 square miles — larger than GTA: San Andreas, GTA IV, and Red Dead Redemption combined.',
+    'Michael\'s motion capture was performed by Ned Luke, who spent months studying the script to portray the character\'s psychological complexity.',
+    'The script for GTA V runs to over 2,000 pages — one of the longest in any entertainment medium.',
+    'GTA Online originally launched with significant technical issues but went on to become the highest-grossing component of the franchise.',
+  ]
+},
+
+'minecraft':{rank:2,title:'Minecraft',dev:'Mojang Studios',publisher:'Xbox Game Studios',year:2011,genre:'Sandbox',subgenre:'Survival / Creative',rating:9.7,score:97,
+  platforms:['PC','Xbox','PS','Switch','Mobile'],
+  img:'https://i.ytimg.com/vi/xvTuYsAKoLo/maxresdefault.jpg',
+  tags:['Creative','Survival','Crafting','Multiplayer','Exploration','Building','Procedural','Family-Friendly'],
+  overview:`Minecraft is the best-selling video game of all time with over 238 million copies sold — a testament to its extraordinary, virtually limitless appeal. Created by Markus "Notch" Persson and developed by Mojang Studios (acquired by Microsoft in 2014 for $2.5 billion), Minecraft presents players with a procedurally generated world of infinite blocks to explore, mine, craft, and transform.
+
+  The game offers multiple modes to suit any style of play: Survival mode tasks players with gathering resources, building shelter, and facing enemies; Creative mode grants unlimited resources for pure construction; Adventure mode enables custom map experiences; and Hardcore mode adds permanent death for ultimate challenge.
+
+  Minecraft's cultural impact is immeasurable. It has been used in educational institutions worldwide, inspired careers in engineering and architecture, spawned a billion-dollar merchandising empire, and created one of gaming's most passionate and creative communities. Its signature blocky aesthetic is one of the most recognized visual identities on the planet.`,
+  features:[
+    {icon:'🏗️',title:'Infinite Building',desc:'Construct literally anything from tiny homes to full-scale recreations of real-world landmarks.'},
+    {icon:'⚔️',title:'Survival Mode',desc:'Gather resources, craft tools, build shelter, and fight mobs including the iconic Creeper.'},
+    {icon:'🌍',title:'Infinite Worlds',desc:'Procedurally generated worlds that are theoretically infinite in size — no two are alike.'},
+    {icon:'🔮',title:'Redstone',desc:'A complex electrical system within the game enabling players to build working computers and machines.'},
+    {icon:'👥',title:'Multiplayer Servers',desc:'Thousands of community servers offering mini-games, roleplay, and collaborative building.'},
+    {icon:'🎨',title:'Texture Packs',desc:'Extensive modding and texture pack support allowing dramatic visual and gameplay customization.'},
+  ],
+  scores:[
+    {label:'Metacritic (PC)',val:93,color:'#5b4fff'},{label:'OpenCritic',val:92,color:'#7c6bff'},
+    {label:'IGN',val:90,color:'#ef4444'},{label:'GameSpot',val:88,color:'#f59e0b'},
+    {label:'Eurogamer',val:90,color:'#10b981'},{label:'User Score (MC)',val:80,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'PC Gamer',score:'94/100',reviewer:'Tom Senior',text:'Minecraft is an extraordinary achievement — a game that gives you nothing and everything simultaneously. Its genius lies in what it doesn\'t tell you, letting curiosity drive discovery in a world with no edges.'},
+    {outlet:'Eurogamer',score:'9/10',reviewer:'Alec Meer',text:'There is no experience quite like Minecraft. It is joyful and terrifying, creative and destructive, meditative and frenetic — often all at once. A game for every human being on earth.'},
+    {outlet:'IGN',score:'9/10',reviewer:'Dan Stapleton',text:'Minecraft is a game that respects your imagination above all else. Its procedural worlds, deep crafting, and survival mechanics combine into something genuinely magical.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Best Family Game',org:'BAFTA 2012'},
+    {icon:'🌟',title:'Game of the Year',org:'Spike VGA 2011'},
+    {icon:'🎮',title:'Innovation Award',org:'GDC Awards 2012'},
+    {icon:'📚',title:'Used in 115 Countries',org:'MinecraftEdu Program'},
+    {icon:'🌍',title:'Best-Selling Game',org:'Guinness World Records'},
+    {icon:'💡',title:'Cultural Impact Award',org:'TIME Magazine'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 10 64-bit',CPU:'Intel Core i3-3210 / AMD A8-7600',RAM:'4 GB',GPU:'Intel HD 4000 / AMD Radeon R5',Storage:'4 GB'},
+    rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7-6500U / AMD Ryzen 5 3600',RAM:'8 GB',GPU:'NVIDIA GTX 1060 / AMD RX 580',Storage:'8 GB SSD'},
+  },
+  trivia:[
+    'Minecraft was originally called "Cave Game" during development by a solo developer, Markus Persson, in 2009.',
+    'Microsoft acquired Mojang Studios in 2014 for $2.5 billion — one of the largest gaming acquisitions at the time.',
+    'The Creeper was created by accident — Notch mistyped pig model dimensions, creating a tall, monstrous shape that was too good not to use.',
+    'Minecraft has been used in over 115 countries as an educational tool through the MinecraftEdu initiative.',
+    'The game\'s soundtrack by C418 has over 1 billion streams on Spotify — remarkable for an ambient game soundtrack.',
+  ]
+},
+
+'zelda-botw':{rank:3,title:'The Legend of Zelda: Breath of the Wild',dev:'Nintendo EPD',publisher:'Nintendo',year:2017,genre:'Adventure',subgenre:'Open World',rating:9.7,score:97,
+  platforms:['Switch'],
+  img:'https://www.nintendo.com/eu/media/images/10_share_images/games_15/wiiu_14/SI_WiiU_TheLegendOfZeldaBreathOfTheWild_image1600w.jpg',
+  tags:['Open World','Exploration','Puzzles','Physics','Adventure','Climbing','Cooking','Shrines'],
+  overview:`The Legend of Zelda: Breath of the Wild is a landmark in game design — a title that fundamentally reconsidered what an open-world game could be. Released as a launch title for the Nintendo Switch, it handed players a vast Hyrule and said simply: go. No waypoints forcing a path, no rigid quest structure, no invisible walls. Every mountain visible on the horizon could be climbed; every body of water could be swum.
+
+  The game's physics and chemistry engine drove emergent gameplay of extraordinary depth. Fire spread realistically. Metal attracted lightning. Objects could be combined in ways the developers never scripted. Cooking turned hundreds of ingredients into thousands of meal combinations with meaningful buffs. Shrines — over 120 compact puzzle chambers — replaced traditional dungeons with consistently surprising, self-contained challenges.
+
+  Link's story — pieced together through environmental detail and scattered memories — subverted the usual Zelda narrative structure to profound effect. Breath of the Wild received a near-universal score of 97 on Metacritic, making it the highest-rated game on the Switch and one of the highest-rated games ever made.`,
+  features:[
+    {icon:'🧗',title:'Full Climbing',desc:'Climb any surface in the world — mountains, buildings, cliffs — limited only by your stamina.'},
+    {icon:'⚡',title:'Physics Engine',desc:'A deep physics and chemistry system enabling extraordinary emergent gameplay solutions.'},
+    {icon:'🍳',title:'Cooking System',desc:'Combine over 110 ingredients into hundreds of meals and elixirs with varied stat effects.'},
+    {icon:'🗡️',title:'Weapon Durability',desc:'All weapons break, encouraging constant experimentation with enemy weapons and found items.'},
+    {icon:'🧩',title:'120 Shrines',desc:'Compact, self-contained puzzle chambers each with unique mechanical challenges.'},
+    {icon:'🌧️',title:'Dynamic Weather',desc:'Fully dynamic weather system — rain makes surfaces slippery; lightning strikes metal equipment.'},
+  ],
+  scores:[
+    {label:'Metacritic',val:97,color:'#5b4fff'},{label:'OpenCritic',val:97,color:'#7c6bff'},
+    {label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},
+    {label:'Eurogamer',val:100,color:'#10b981'},{label:'Famitsu',val:98,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'IGN',score:'10/10',reviewer:'Jose Otero',text:'Breath of the Wild is a masterpiece of open-world design. It redefined what a game in this genre can be, and in doing so, set a new benchmark for the entire industry.'},
+    {outlet:'GameSpot',score:'10/10',reviewer:'Peter Brown',text:'Link\'s latest adventure is awe-inspiring. Nintendo has delivered something that feels genuinely new — a world that invites exploration, rewards curiosity, and consistently surprises.'},
+    {outlet:'The Guardian',score:'5/5',reviewer:'Keith Stuart',text:'Sublime. A game that confidently tears up the Zelda rulebook and replaces it with something more wondrous, more alive, more humane than anything Nintendo has made before.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Game of the Year',org:'The Game Awards 2017'},
+    {icon:'🌟',title:'Best Game Direction',org:'The Game Awards 2017'},
+    {icon:'🎮',title:'Best Action/Adventure',org:'The Game Awards 2017'},
+    {icon:'🏅',title:'GOTY – 200+ outlets',org:'Multiple Publications'},
+    {icon:'🌍',title:'Best Open World',org:'IGN Best Of 2017'},
+    {icon:'💡',title:'Innovation Award',org:'GDC Awards 2018'},
+  ],
+  sysreq:{min:{OS:'Nintendo Switch System Software',CPU:'Nintendo Switch SoC (ARM Cortex-A57)',RAM:'4 GB LPDDR4',GPU:'Nvidia Tegra X1',Storage:'13.4 GB'},rec:{OS:'Nintendo Switch (OLED Model)',CPU:'Nintendo Switch SoC',RAM:'4 GB LPDDR4',GPU:'Nvidia Tegra X1 (docked 1080p)',Storage:'13.4 GB + microSD recommended'}},
+  trivia:[
+    'Development team size exceeded 300 people — the largest Nintendo has ever assembled for a single title.',
+    'The game features over 100 hours of content and is estimated to take 50+ hours to complete the main story alone.',
+    'Nintendo studied Shigeru Miyamoto\'s original Legend of Zelda design philosophy — "a miniature garden that players can put inside their drawer" — to rebuild the series from the ground up.',
+    'The game was shown in a single 3-minute trailer at E3 2014, years before its actual release, generating massive anticipation.',
+    'Voice acting — a Zelda series first — was recorded in both English and Japanese simultaneously, an unprecedented production approach for Nintendo.',
+  ]
+},
+
+'red-dead-2':{rank:4,title:'Red Dead Redemption 2',dev:'Rockstar Games',publisher:'Rockstar Games',year:2018,genre:'Action',subgenre:'Western / Open World',rating:9.6,score:96,
+  platforms:['PS','Xbox','PC'],
+  img:'https://i.ytimg.com/vi/SXvQ1nK4oxk/maxresdefault.jpg',
+  tags:['Story Rich','Western','Open World','Cinematic','Emotional','Horses','Honor System','Gang Life'],
+  overview:`Red Dead Redemption 2 is a technical and narrative masterpiece that set a new standard for open-world gaming. A prequel to the beloved original, it follows Arthur Morgan — outlaw, enforcer, and moral compass of the Van der Linde gang — as the age of outlaws draws to a close in 1899 America.
+
+  The world of RDR2 is unprecedented in its density and authenticity. NPCs follow daily routines, remember past interactions, and react dynamically to your honor level. Wildlife — 200 species — behave with ecological realism. Weather systems affect gameplay, visibility, and character comfort. Arthur must eat, sleep, and maintain his appearance to avoid stat penalties.
+
+  But it is the story that elevates RDR2 beyond technical showcase. Arthur's journey — from loyal enforcer to a man confronting his own mortality and the emptiness of his choices — is one of gaming's greatest character studies. Roger Clark's motion-captured performance is among the finest in the medium. This is a game about what it means to live with the consequences of who you have been.`,
+  features:[
+    {icon:'🤠',title:'Arthur Morgan',desc:'One of gaming\'s most complex protagonists — a nuanced portrayal of loyalty, guilt, and redemption.'},
+    {icon:'🐎',title:'Horse Bonding',desc:'Deep horse care system — groom, feed, and bond with your horse to unlock improved stats and trust.'},
+    {icon:'⚖️',title:'Honor System',desc:'A dynamic honor system that shapes NPC reactions, story outcomes, and available missions.'},
+    {icon:'🌄',title:'Massive World',desc:'Five distinct states from bayous to mountains, each meticulously crafted with ecological authenticity.'},
+    {icon:'🦅',title:'Wildlife & Hunting',desc:'200 animal species with realistic behavior — hunt for sustenance, craft, and trade at camp.'},
+    {icon:'🏕️',title:'Gang Camp',desc:'A living gang camp that evolves with story progress — upgrade facilities and manage morale.'},
+  ],
+  scores:[
+    {label:'Metacritic (PS4)',val:97,color:'#5b4fff'},{label:'OpenCritic',val:97,color:'#7c6bff'},
+    {label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},
+    {label:'Eurogamer',val:100,color:'#10b981'},{label:'Game Informer',val:100,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'IGN',score:'10/10',reviewer:'Kimberley Wallace',text:'Red Dead Redemption 2 is a masterpiece of storytelling and world-building. Arthur Morgan is one of gaming\'s greatest protagonists and his story is told with a grace and emotional intelligence rarely achieved in any medium.'},
+    {outlet:'GameSpot',score:'10/10',reviewer:'Kallie Plagge',text:'This is one of the best games ever made. It tells a story of incredible depth and humanity, set in a world of extraordinary detail and beauty, playable in ways that feel genuinely meaningful.'},
+    {outlet:'The Guardian',score:'5/5',reviewer:'Rich Stanton',text:'An extraordinary achievement that goes far beyond what any open-world game has attempted before. Red Dead Redemption 2 is patient, brutal, melancholy, and genuinely moving.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Best Narrative',org:'The Game Awards 2018'},
+    {icon:'🌟',title:'Best Score/Music',org:'The Game Awards 2018'},
+    {icon:'🎮',title:'Best Performance',org:'The Game Awards 2018'},
+    {icon:'🏅',title:'Technical Achievement',org:'DICE Awards 2019'},
+    {icon:'🌍',title:'Best Open World',org:'Multiple Publications 2018'},
+    {icon:'💡',title:'Outstanding Writing',org:'Writers Guild of America'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 10 64-bit',CPU:'Intel Core i5-2500K / AMD FX-6300',RAM:'8 GB',GPU:'NVIDIA GTX 770 2GB / AMD RX 480 4GB',Storage:'150 GB'},
+    rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7-4770K / AMD Ryzen 5 3600',RAM:'16 GB',GPU:'NVIDIA GTX 1060 6GB / AMD RX 5700 8GB',Storage:'150 GB SSD'},
+  },
+  trivia:[
+    'RDR2 took 8 years and an estimated $540 million to develop — one of the most expensive games ever made.',
+    'The game features over 500,000 lines of dialogue — the most ever recorded for a single video game.',
+    'Roger Clark, who voiced and motion-captured Arthur Morgan, lost 25 pounds over the course of development to portray Arthur\'s declining health in the story\'s later chapters.',
+    'Over 1,200 people contributed to the game\'s development across Rockstar\'s global studio network.',
+    'The game world contains over 200 species of wildlife, all programmed with authentic ecological behaviors and prey-predator relationships.',
+  ]
+},
+
+'god-of-war':{rank:5,title:'God of War (2018)',dev:'Santa Monica Studio',publisher:'Sony Interactive Entertainment',year:2018,genre:'Action-RPG',subgenre:'Norse Mythology',rating:9.6,score:96,
+  platforms:['PS','PC'],
+  img:'https://wallpapercave.com/wp/wp2680103.jpg',
+  tags:['Action','Story Rich','Norse Mythology','Father & Son','Combat','RPG','Emotional','Single Shot'],
+  overview:`God of War (2018) is one of gaming's most remarkable reinventions. Director Cory Barlog transformed a franchise known for its visceral, mythologically-themed action into something far more intimate: a story about fatherhood, legacy, and the impossible weight of who we were versus who we are trying to be.
+
+  Kratos — the Ghost of Sparta, killer of Greek gods — has fled to the Norse realm, remarried, and had a son named Atreus. When his wife dies, he is forced on a journey to scatter her ashes from the highest peak in the Nine Realms. What follows is not just an epic adventure but a deeply human drama about communication, grief, and what parents owe their children.
+
+  The game is presented in a single, unbroken camera shot — no cuts, no load screens, no transitions. Every moment of Kratos and Atreus's journey is experienced in continuous real time. The Leviathan Axe introduced a new combat paradigm: thrown at enemies, it freezes them on impact, then returns to Kratos's hand on command — one of gaming's most satisfying mechanical inventions. The game won Game of the Year at The Game Awards 2018.`,
+  features:[
+    {icon:'🎬',title:'Single-Shot Camera',desc:'The entire game is one unbroken camera shot — no cuts or transitions of any kind.'},
+    {icon:'🪓',title:'Leviathan Axe',desc:'Kratos\'s iconic new weapon — thrown to freeze enemies, recalled at will with tactile satisfaction.'},
+    {icon:'👦',title:'Atreus System',desc:'Atreus fights alongside Kratos and evolves emotionally throughout the story — commanding him in battle.'},
+    {icon:'🌍',title:'Nine Realms',desc:'Explore the mythological Norse cosmos across connected realms including Midgard, Alfheim, and Helheim.'},
+    {icon:'⚙️',title:'Runic Attacks',desc:'Equip Runic Attacks to weapons for devastating special moves with cooldown management.'},
+    {icon:'🛡️',title:'Shield Combat',desc:'Parry and shield-bash mechanics reward aggressive timing with devastating counterattacks.'},
+  ],
+  scores:[
+    {label:'Metacritic',val:94,color:'#5b4fff'},{label:'OpenCritic',val:94,color:'#7c6bff'},
+    {label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},
+    {label:'Eurogamer',val:100,color:'#10b981'},{label:'Game Informer',val:100,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'IGN',score:'10/10',reviewer:'Jonathon Dornbush',text:'God of War is a triumph. Everything about it — the combat, the world, the characters — is in service of an emotionally resonant story about what it means to be a father and to become something better than what you were.'},
+    {outlet:'GameSpot',score:'10/10',reviewer:'Edmond Tran',text:'Exceptional. God of War reinvents one of PlayStation\'s most beloved franchises with courage, intelligence, and extraordinary craft. The relationship between Kratos and Atreus is the heart of something special.'},
+    {outlet:'Polygon',score:'Essential',reviewer:'Philip Kollar',text:'Santa Monica Studio made a game that uses the trappings of an action blockbuster to tell something genuinely profound about the way fathers and sons struggle to know each other.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Game of the Year',org:'The Game Awards 2018'},
+    {icon:'🌟',title:'Best Narrative',org:'The Game Awards 2018'},
+    {icon:'🎮',title:'Best Performance',org:'The Game Awards 2018'},
+    {icon:'🏅',title:'Best Direction',org:'The Game Awards 2018'},
+    {icon:'🌍',title:'GOTY – 100+ publications',org:'Multiple Outlets 2018'},
+    {icon:'💡',title:'Best Action Game',org:'The Game Awards 2018'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 10 64-bit',CPU:'Intel i5-6600K / AMD Ryzen 5 2400G',RAM:'8 GB',GPU:'NVIDIA GTX 1060 (6GB) / AMD RX 5500 XT (8GB)',Storage:'70 GB'},
+    rec:{OS:'Windows 11 64-bit',CPU:'Intel i9-9900K / AMD Ryzen 9 3900X',RAM:'16 GB',GPU:'NVIDIA RTX 3080 / AMD RX 6800 XT',Storage:'70 GB SSD'},
+  },
+  trivia:[
+    'Director Cory Barlog had to fight internally to make the game\'s intimate father-son story — Sony executives were initially skeptical of the dramatic tonal shift.',
+    'The single-shot camera technique required an entirely new engine and camera system, developed over multiple years.',
+    'Christopher Judge, who voices Kratos, is 6\'3" — his physical presence and deep voice transformed how the character communicates.',
+    'The game\'s development team visited Norse scholars and historians to ensure the mythological accuracy of the world and its pantheon.',
+    'The sequel, Ragnarök, continued the single-shot technique across a significantly larger world.',
+  ]
+},
+
+'elden-ring':{rank:7,title:'Elden Ring',dev:'FromSoftware',publisher:'Bandai Namco',year:2022,genre:'Action-RPG',subgenre:'Open World Soulslike',rating:9.6,score:96,
+  platforms:['PS','Xbox','PC'],
+  img:'https://flowgames.gg/wp-content/uploads/2023/07/9edf816d-5625-45d2-9ef6-8b2ae65bb7eaCover_Elder-Ring.webp',
+  tags:['Soulslike','Open World','Dark Fantasy','Challenging','Exploration','Lore-Rich','Boss Fights','Co-op'],
+  overview:`Elden Ring represents the culmination of FromSoftware's design philosophy — the demanding, intricate, deeply atmospheric world of the Soulsborne series expanded into an open world co-created with Game of Thrones author George R.R. Martin. The Lands Between is a vast, vertically layered realm of extraordinary visual imagination, filled with secrets buried in the landscape and bosses of staggering creative ambition.
+
+  Martin crafted the world's foundational mythology — the history of the Elden Ring's shattering and the demigods who warred over its shards — giving director Hidetaka Miyazaki a richer lore substrate than any previous FromSoftware title. The result is a world with depth that rewards obsessive exploration and rewards players who piece together its fractured narrative.
+
+  With over 30 million copies sold in its first year, Elden Ring became FromSoftware's most commercially successful title by a substantial margin, while simultaneously receiving near-universal critical acclaim. It won Game of the Year 2022 at virtually every publication and awards body that recognizes the category.`,
+  features:[
+    {icon:'🌍',title:'Open World Design',desc:'A seamlessly connected open world across six major regions, each with dungeons, bosses, and secrets.'},
+    {icon:'🐎',title:'Torrent',desc:'A spectral mount enabling fast traversal and mounted combat across the Lands Between.'},
+    {icon:'🧠',title:'Legacy Dungeons',desc:'Six massive, intricately designed legacy dungeons recalling the interconnected design of Dark Souls.'},
+    {icon:'⚔️',title:'312 Skills',desc:'An unprecedented variety of combat skills across hundreds of weapons, enabling near-infinite build variety.'},
+    {icon:'🌙',title:'Night System',desc:'Enemy types and patrol patterns change at night — some areas only reveal their secrets in darkness.'},
+    {icon:'👥',title:'Spirit Summons',desc:'Summon spirits of defeated enemies as allies in battle, each with unique combat behaviors.'},
+  ],
+  scores:[
+    {label:'Metacritic (PC)',val:95,color:'#5b4fff'},{label:'OpenCritic',val:95,color:'#7c6bff'},
+    {label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},
+    {label:'Eurogamer',val:100,color:'#10b981'},{label:'Game Informer',val:95,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'IGN',score:'10/10',reviewer:'Tom Marks',text:'Elden Ring is FromSoftware\'s magnum opus — the Soulslike formula perfected and expanded into one of the most extraordinary open worlds ever created. A landmark achievement.'},
+    {outlet:'GameSpot',score:'10/10',reviewer:'Tamoor Hussain',text:'Vast, beautiful, punishing, and endlessly rewarding. Elden Ring is FromSoftware operating at the absolute peak of their powers, and the result is one of the greatest games ever made.'},
+    {outlet:'Eurogamer',score:'Essential',reviewer:'Edwin Evans-Thirlwell',text:'The most confident, accomplished game FromSoftware has ever produced. Every inch of the Lands Between is the product of extraordinary creative vision executed with total mastery.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Game of the Year',org:'The Game Awards 2022'},
+    {icon:'🌟',title:'Best RPG',org:'The Game Awards 2022'},
+    {icon:'🎮',title:'Best Art Direction',org:'The Game Awards 2022'},
+    {icon:'🏅',title:'GOTY – 175+ outlets',org:'Multiple Publications'},
+    {icon:'🌍',title:'30M+ Copies Sold',org:'Bandai Namco 2023'},
+    {icon:'💡',title:'Best Action Game',org:'Multiple Awards Bodies'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 10/11 64-bit',CPU:'Intel Core i5-8400 / AMD Ryzen 3 3300X',RAM:'12 GB',GPU:'NVIDIA GTX 1060 3GB / AMD RX 580 4GB',Storage:'60 GB'},
+    rec:{OS:'Windows 10/11 64-bit',CPU:'Intel Core i7-8700K / AMD Ryzen 5 3600X',RAM:'16 GB',GPU:'NVIDIA GTX 1070 8GB / AMD RX 5700 XT 8GB',Storage:'60 GB SSD'},
+  },
+  trivia:[
+    'George R.R. Martin wrote the underlying mythology and world history — Miyazaki then built forward from it, calling the collaboration "a completely new experience."',
+    'The game sold 12 million copies in its first 3 weeks — a record for Bandai Namco and FromSoftware.',
+    'Elden Ring features over 100 bosses, with many hidden in optional areas requiring specific exploration to discover.',
+    'The game\'s score was composed by Yuka Kitamura, Shoi Miyazawa, and others — a first for the series in having multiple composers.'],
+},
+
+'witcher3':{rank:8,title:'The Witcher 3: Wild Hunt',dev:'CD Projekt Red',publisher:'CD Projekt',year:2015,genre:'RPG',subgenre:'Dark Fantasy',rating:9.5,score:95,
+  platforms:['PS','Xbox','PC','Switch'],
+  img:'https://images.gog-statics.com/ca20a040b7e7dbf11f954b4fa85e1ecdcf8f95eeba8ebf71f89455794eec80f2.jpg',
+  tags:['RPG','Dark Fantasy','Story Rich','Open World','Choices Matter','Gwent','Mature Themes','Massive'],
+  overview:`The Witcher 3: Wild Hunt is the gold standard of the open-world RPG — a game of extraordinary scope and quality that delivered on the impossible promise of its ambition. CD Projekt Red crafted a world of breathtaking scale populated with morally complex characters, genuinely meaningful choices, and side content that rivals the quality of most games' main stories.
+
+  Playing as Geralt of Rivia — a Witcher, a monster hunter for hire — players traverse the Northern Realms in search of Ciri, Geralt's adopted daughter, while the spectral army of the Wild Hunt pursues her across the world. The narrative weaves personal drama with political intrigue across a continent devastated by war.
+
+  What makes The Witcher 3 legendary is not its size but its consistent quality at every level. "The Bloody Baron" — a side questline introduced in the first major region — is widely considered one of gaming's finest examples of mature, morally ambiguous storytelling. The game's two expansions, Hearts of Stone and Blood and Wine, added dozens more hours of content of equivalent quality, with Blood and Wine in particular receiving Game of the Year consideration in its own right.`,
+  features:[
+    {icon:'🗺️',title:'235+ Hours of Content',desc:'The main story, side quests, contracts, and DLC offer an estimated 200-300 hours of quality content.'},
+    {icon:'⚔️',title:'Signs & Combat',desc:'Blend sword combat with five magical Signs — Aard, Igni, Axii, Yrden, and Quen — for tactical depth.'},
+    {icon:'🃏',title:'Gwent Card Game',desc:'A fully-realized in-game card game that became so popular CD Projekt Red made it a standalone title.'},
+    {icon:'🌿',title:'Alchemy System',desc:'Brew hundreds of potions, decoctions, and bombs from looted ingredients to exploit monster weaknesses.'},
+    {icon:'🗣️',title:'Dialogue Choices',desc:'Every major conversation presents choices with genuine consequences that ripple through the story.'},
+    {icon:'🦌',title:'Dynamic Bestiary',desc:'Study monsters through contracts and research — weaknesses, behaviors, and lore all meticulously detailed.'},
+  ],
+  scores:[
+    {label:'Metacritic (PC)',val:93,color:'#5b4fff'},{label:'OpenCritic',val:95,color:'#7c6bff'},
+    {label:'IGN',val:98,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},
+    {label:'Eurogamer',val:100,color:'#10b981'},{label:'RPGFan',val:97,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'GameSpot',score:'10/10',reviewer:'Kevin VanOrd',text:'The Witcher 3 is an astonishing achievement. CD Projekt Red has raised the bar for open-world RPGs so high that it\'s difficult to imagine it being matched. Every quest, every character, every choice feels crafted with extraordinary care.'},
+    {outlet:'IGN',score:'9.8/10',reviewer:'Dan Stapleton',text:'An enormous, gorgeous, and complex RPG that manages to maintain its quality across hundreds of hours of content. The Witcher 3 is a landmark achievement for the genre.'},
+    {outlet:'Eurogamer',score:'Essential',reviewer:'Oli Welsh',text:'Perhaps the finest open-world RPG ever made. CD Projekt Red has created a world that feels alive, a story that respects its players\' intelligence, and gameplay systems of genuine depth and satisfaction.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Game of the Year',org:'The Game Awards 2015'},
+    {icon:'🌟',title:'GOTY – 250+ outlets',org:'Multiple Publications'},
+    {icon:'🎮',title:'Best RPG',org:'The Game Awards 2015'},
+    {icon:'🏅',title:'Best Writing',org:'Writers Guild Awards 2016'},
+    {icon:'🌍',title:'Best World Design',org:'Multiple Awards Bodies'},
+    {icon:'💡',title:'Best PC Game',org:'PC Gamer'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 7/8/10 64-bit',CPU:'Intel Core i5-2500K / AMD Phenom II X4 940',RAM:'6 GB',GPU:'NVIDIA GTX 660 / AMD HD 7870',Storage:'35 GB'},
+    rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7-3770 / AMD Ryzen 5 3600',RAM:'8 GB',GPU:'NVIDIA GTX 1070 / AMD RX 5700',Storage:'35 GB SSD'},
+  },
+  trivia:[
+    '"The Bloody Baron" questline — a side mission in the game\'s first act — is widely cited as one of the finest examples of mature storytelling in the history of the medium.',
+    'The game\'s two expansions — Hearts of Stone and Blood and Wine — added 30+ hours each and were received as favorably as many full-priced games.',
+    'CD Projekt Red provided 16 free DLC packs post-launch, setting a community-friendly precedent that contrasted sharply with industry norms.',
+    'The Witcher 3 won over 250 Game of the Year awards — more than any game in history at the time of its release.',
+    'The game\'s standalone card game, Gwent, developed its own competitive esports scene and dedicated fanbase.',
+  ]
+},
+
+'hollow-knight':{rank:19,title:'Hollow Knight',dev:'Team Cherry',publisher:'Team Cherry',year:2017,genre:'Metroidvania',subgenre:'Indie',rating:9.1,score:91,
+  platforms:['PC','Switch','PS','Xbox'],
+  img:'https://gamefreaks365.com/wp-content/uploads/2022/11/Hollow-Knight-cover-art-lore.jpg',
+  tags:['Metroidvania','Indie','Challenging','Atmospheric','Hand-drawn','Lore-Rich','Exploration','Boss Rush'],
+  overview:`Hollow Knight is the most celebrated achievement in indie game development — a hand-drawn, 40-hour metroidvania created by a three-person studio in Adelaide, Australia, that surpasses most AAA titles in content, atmosphere, and mechanical depth.
+
+  Set in Hallownest — a vast underground insect kingdom fallen into ruin — the game places you in control of the Knight, a silent, cloaked warrior whose origins are one of gaming's most elegantly revealed mysteries. With minimal on-screen guidance, the world unfolds through exploration, environmental detail, and scattered fragments of dialogue that together construct a lore of extraordinary richness.
+
+  The game features 45+ bosses, each with unique mechanics that demand genuine mastery. Combat is precise and punishing, built around a nail-swinging system augmented by magical Spell abilities and equippable Charm combinations that allow deep build customization. With multiple endings, an optional Pantheon boss rush, and the free Godmaster and Grimm Troupe DLC expansions, Hollow Knight offers an astounding quantity of content for its price.`,
+  features:[
+    {icon:'🖌️',title:'Hand-Drawn Art',desc:'Every frame, enemy, and environment hand-drawn by the three-person team with extraordinary detail.'},
+    {icon:'🗺️',title:'Massive World',desc:'17 distinct areas across a 60+ room map that unfolds through exploration without handholding.'},
+    {icon:'💎',title:'Charm System',desc:'45 equippable Charms that modify playstyle — combine them within a Notch limit for custom builds.'},
+    {icon:'⚔️',title:'45+ Bosses',desc:'Among the most acclaimed boss designs in the genre — each requiring learned mechanics to overcome.'},
+    {icon:'🌑',title:'Lore & Mystery',desc:'A deep, layered story communicated almost entirely through environmental detail and NPC dialogue fragments.'},
+    {icon:'🎵',title:'Christopher Larkin Score',desc:'An orchestral soundtrack of haunting beauty that ranks among gaming\'s finest.'},
+  ],
+  scores:[
+    {label:'Metacritic (PC)',val:87,color:'#5b4fff'},{label:'OpenCritic',val:89,color:'#7c6bff'},
+    {label:'IGN',val:90,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},
+    {label:'Eurogamer',val:95,color:'#10b981'},{label:'Nintendo Life',val:100,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'Eurogamer',score:'Essential',reviewer:'Christian Donlan',text:'A masterpiece of atmosphere and level design. Hollow Knight\'s world feels genuinely alive and mysterious in a way that most games ten times its budget cannot achieve. Team Cherry has created something extraordinary.'},
+    {outlet:'IGN',score:'9/10',reviewer:'Brandin Tyrrel',text:'Hollow Knight is a triumph of the metroidvania genre — beautifully crafted, mechanically deep, and endlessly atmospheric. Team Cherry punches far above their weight class.'},
+    {outlet:'PC Gamer',score:'93/100',reviewer:'Samuel Roberts',text:'One of the most accomplished games of the decade. Hollow Knight\'s world rewards every hour of exploration with new wonders, its combat demands and delivers mastery, and its lore haunts long after the credits roll.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Best Indie Game',org:'Multiple Awards 2017'},
+    {icon:'🌟',title:'Excellence in Design',org:'Independent Games Festival'},
+    {icon:'🎮',title:'Best Debut Indie',org:'BAFTA Games 2018'},
+    {icon:'🏅',title:'Seumas McNally Grand Prize',org:'IGF Nomination 2018'},
+    {icon:'🌍',title:'Critics Choice Award',org:'Multiple Publications'},
+    {icon:'💡',title:'Best Soundtrack',org:'Various Games Media'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 7 64-bit',CPU:'Intel Core 2 Duo E5200',RAM:'4 GB',GPU:'GeForce 9800GTX+ / AMD HD 5870',Storage:'9 GB'},
+    rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i5 / AMD Ryzen 5',RAM:'8 GB',GPU:'NVIDIA GTX 1050 / AMD RX 570',Storage:'9 GB SSD'},
+  },
+  trivia:[
+    'Hollow Knight was funded through Kickstarter in 2014, raising $57,000 AUD — far exceeding its $35,000 goal — from a passionate community of backers.',
+    'Team Cherry released four major free content expansions post-launch — The Grimm Troupe, Lifeblood, Godmaster, and Hidden Dreams — adding dozens of hours of content.',
+    'The game took approximately 2.5 years to complete, with all three team members working across design, art, programming, and music simultaneously.',
+    'Christopher Larkin composed the entire orchestral soundtrack, and it has been performed at live gaming music concerts worldwide.',
+    'The sequel, Silksong, has been in development since 2019 and is one of the most anticipated games in the indie community.',
+  ]
+},
+
+'tlou1':{rank:27,title:'The Last of Us',dev:'Naughty Dog',publisher:'Sony Computer Entertainment',year:2013,genre:'Action',subgenre:'Survival / Narrative',rating:9.5,score:95,
+  platforms:['PS','PC'],
+  img:'https://www.menaredelicious.com/wp-content/uploads/2012/05/The-last-of-us-Naughty-Dog-cover.jpeg',
+  tags:['Story Rich','Post-Apocalyptic','Emotional','Survival','Stealth','Character Study','Infected','HBO Series'],
+  overview:`The Last of Us established a new benchmark for narrative design in video games. Twenty years after a fungal pandemic transformed most of humanity into violent, infected monsters, Joel — a hardened smuggler hollowed out by personal tragedy — is tasked with transporting a teenage girl named Ellie across what remains of the United States. Ellie is immune to the infection, and her immunity may be the key to a cure.
+
+  What unfolds is not primarily a story about a pandemic or monsters, but about the bond forged between two people who both desperately need each other and struggle to admit it. Joel and Ellie's relationship — built slowly, painfully, across a continent of devastation — is rendered with cinematic authenticity through Troy Baker and Ashley Johnson's extraordinary performances and Neil Druckmann's precise, emotionally intelligent writing.
+
+  The game's design philosophy subordinates every mechanical decision to the service of its narrative. Combat is designed to be brutal and costly rather than empowering — every encounter feels genuinely dangerous, reinforcing the world's hostility. Crafting is minimal and resource-scarce, creating constant tension. The result is one of the most emotionally resonant experiences the medium has produced, later adapted into HBO's acclaimed television series.`,
+  features:[
+    {icon:'🎭',title:'Joel & Ellie',desc:'One of gaming\'s greatest character relationships — built across the whole game through shared trauma.'},
+    {icon:'🧟',title:'Infected Types',desc:'Multiple evolved stages of infected — Runners, Stalkers, Clickers, and Bloaters — each requiring different tactics.'},
+    {icon:'🔧',title:'Crafting System',desc:'Scavenge materials to craft Molotov cocktails, shivs, smoke bombs, and health kits in real time.'},
+    {icon:'🤫',title:'Stealth & Combat',desc:'Flexible approach between stealth and combat — alert enemies behave with convincing tactical intelligence.'},
+    {icon:'🎵',title:'Gustavo Santaolalla',desc:'The game\'s haunting guitar-driven score by Gustavo Santaolalla is among gaming\'s most celebrated soundtracks.'},
+    {icon:'📺',title:'HBO Adaptation',desc:'Adapted into an acclaimed HBO series in 2023, further cementing the story\'s cultural significance.'},
+  ],
+  scores:[
+    {label:'Metacritic',val:95,color:'#5b4fff'},{label:'OpenCritic',val:95,color:'#7c6bff'},
+    {label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},
+    {label:'Eurogamer',val:100,color:'#10b981'},{label:'Edge Magazine',val:100,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'IGN',score:'10/10',reviewer:'Greg Miller',text:'The Last of Us is the best game I have ever played. It tells a story of extraordinary humanity with a craft and emotional intelligence that the medium has never achieved before. It will be remembered forever.'},
+    {outlet:'Edge',score:'10/10',reviewer:'Edge Staff',text:'A masterpiece of the form. Naughty Dog has transcended what we thought video games could be. The Last of Us is not merely a great game — it is a great work of art.'},
+    {outlet:'The Guardian',score:'5/5',reviewer:'Keith Stuart',text:'One of the most emotionally devastating experiences in any entertainment medium. Joel and Ellie\'s story is told with a care and intelligence that elevates the entire art form.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Game of the Year',org:'BAFTA 2014'},
+    {icon:'🌟',title:'GOTY – 200+ outlets',org:'Multiple Publications 2013'},
+    {icon:'🎮',title:'Best Narrative',org:'Multiple Awards Bodies'},
+    {icon:'🏅',title:'Best Performance',org:'Spike VGAs 2013'},
+    {icon:'🌍',title:'Technical Achievement',org:'DICE Awards 2014'},
+    {icon:'💡',title:'HBO Series Adaptation',org:'2023 Emmy Nominations'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 10 64-bit',CPU:'Intel Core i7-8700 / AMD Ryzen 5 3600',RAM:'16 GB',GPU:'NVIDIA GTX 1080 / AMD RX 5700 XT',Storage:'100 GB'},
+    rec:{OS:'Windows 11 64-bit',CPU:'Intel Core i9-9900K / AMD Ryzen 9 3900X',RAM:'16 GB',GPU:'NVIDIA RTX 2080 / AMD RX 6800 XT',Storage:'100 GB SSD'},
+  },
+  trivia:[
+    'The Last of Us was adapted into an Emmy-nominated HBO series in 2023, with Pedro Pascal as Joel and Bella Ramsey as Ellie — one of the most acclaimed video game adaptations ever made.',
+    'Troy Baker and Ashley Johnson\'s performances were fully motion-captured — every facial expression and physical interaction recorded with optical technology.',
+    'The game\'s opening sequence is widely considered one of the most impactful introductions in the history of the medium.',
+    'Neil Druckmann\'s script went through over two years of development, with the relationship between Joel and Ellie central to every design decision from the beginning.',
+    'The Clicker enemy design — characterized by echolocation and the loss of all sight — is inspired by the actual behavior of the Ophiocordyceps unilateralis fungus.',
+  ]
+},
+
+'portal2':{rank:26,title:'Portal 2',dev:'Valve',publisher:'Valve',year:2011,genre:'Puzzle',subgenre:'Physics Puzzler',rating:9.5,score:95,
+  platforms:['PC','PS','Xbox'],
+  img:'https://wallpapercave.com/wp/wp2963879.jpg',
+  tags:['Puzzle','Co-op','Comedy','Sci-Fi','Portal Gun','GLaDOS','Wheatley','Atmospheric'],
+  overview:`Portal 2 is the greatest puzzle game ever made — a sequel that expanded its predecessor's revolutionary portal mechanics into a full-length, endlessly clever, genuinely hilarious experience with one of gaming's best co-operative modes.
+
+  Returning to the Aperture Science facility, protagonist Chell awakens centuries after the events of the first game to find the laboratory crumbling and populated by a bumbling new AI, Wheatley, voiced by Stephen Merchant. GLaDOS — the iconic antagonist-turned-reluctant-ally — returns, and the layered dynamic between these characters drives a narrative that manages genuine comedy and surprising emotional depth simultaneously.
+
+  The single-player campaign introduces gel mechanics — Repulsion Gel bounces, Propulsion Gel accelerates, and Conversion Gel applies portal surfaces — exponentially expanding the puzzle design space beyond what the portal gun alone could achieve. The separate co-operative campaign, designed for two players with dedicated portal guns each, doubles the available puzzle complexity and remains one of gaming's finest collaborative experiences.`,
+  features:[
+    {icon:'🔵',title:'Portal Mechanics',desc:'Create linked portals on surfaces to redirect yourself and objects through space — physics puzzling at its finest.'},
+    {icon:'🎨',title:'Gel Mechanics',desc:'Three gel types — Repulsion, Propulsion, and Conversion — dramatically expand the puzzle design space.'},
+    {icon:'👥',title:'Co-op Campaign',desc:'A separate cooperative campaign for two players, each with their own portal gun — 40+ unique puzzles.'},
+    {icon:'😂',title:'GLaDOS & Wheatley',desc:'Two of gaming\'s most beloved characters deliver a genuinely funny, emotionally layered narrative.'},
+    {icon:'🏭',title:'Aperture History',desc:'Explore the deep history of Aperture Science through pre-recorded messages from founder Cave Johnson.'},
+    {icon:'🎵',title:'Jonathan Coulton',desc:'End credits song "Want You Gone" and co-op credits song are beloved parts of gaming culture.'},
+  ],
+  scores:[
+    {label:'Metacritic (PC)',val:95,color:'#5b4fff'},{label:'OpenCritic',val:96,color:'#7c6bff'},
+    {label:'IGN',val:95,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},
+    {label:'Eurogamer',val:100,color:'#10b981'},{label:'PC Gamer',val:96,color:'#3b82f6'},
+  ],
+  reviews:[
+    {outlet:'Eurogamer',score:'10/10',reviewer:'Tom Bramwell',text:'Portal 2 is a triumph. Funnier than almost any game, cleverer than most, and more emotionally resonant than you\'d ever expect. Valve has made something genuinely special — a puzzle game that transcends the genre.'},
+    {outlet:'IGN',score:'9.5/10',reviewer:'Anthony Gallegos',text:'Portal 2 is an extraordinary achievement. Its puzzles are inventive without becoming frustrating, its story is funny and surprisingly touching, and its cooperative mode is one of gaming\'s finest collaborative experiences.'},
+    {outlet:'PC Gamer',score:'96/100',reviewer:'Tom Francis',text:'Portal 2 might be the most perfectly paced game ever made. Every element — the puzzles, the writing, the world-building — arrives at exactly the right moment to maximize impact.'},
+  ],
+  awards:[
+    {icon:'🏆',title:'Game of the Year',org:'Spike VGAs 2011'},
+    {icon:'🌟',title:'Best PC Game',org:'Multiple Publications 2011'},
+    {icon:'🎮',title:'Best Puzzle Game',org:'Multiple Awards Bodies'},
+    {icon:'🏅',title:'Best Writing',org:'Writers Guild Awards 2012'},
+    {icon:'🌍',title:'Best Co-op Experience',org:'Multiple Publications'},
+    {icon:'💡',title:'Innovation Award',org:'GDC Awards 2012'},
+  ],
+  sysreq:{
+    min:{OS:'Windows 7/Vista/XP',CPU:'Intel Core 2 Duo 2.4GHz / AMD Athlon X2',RAM:'2 GB',GPU:'NVIDIA GTX 8800 / ATI X1600',Storage:'8.5 GB'},
+    rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i5 / AMD Ryzen 5',RAM:'4 GB',GPU:'NVIDIA GTX 1050 / AMD RX 470',Storage:'8.5 GB SSD'},
+  },
+  trivia:[
+    '"Still Alive" from Portal became one of gaming\'s most iconic songs — the sequel\'s "Want You Gone" continued the tradition of humorous, lore-rich end credits songs.',
+    'Stephen Merchant, who voices Wheatley, improvised significant portions of his dialogue — Valve encouraged creative freedom with the character.',
+    'The co-operative campaign was designed entirely separately from single-player, using dedicated two-player puzzle logic from the ground up.',
+    'J.K. Simmons voices Cave Johnson, the unhinged founder of Aperture Science — his performance of the "When Life Gives You Lemons" speech became a viral internet moment.',
+    'The original Portal was created in a single semester by 12 students as their DigiPen thesis project — Valve hired the team and published it as a standalone game.',
+  ]
+},
+
+// ── Remaining games with full data ──
+'tlou2':{rank:6,title:'The Last of Us Part II',dev:'Naughty Dog',publisher:'Sony Interactive Entertainment',year:2020,genre:'Action',subgenre:'Survival Horror',rating:9.3,score:93,platforms:['PS'],img:'https://image.api.playstation.com/vulcan/ap/rnd/202312/0117/da083fa5e19458dd750aa8a6ea30ba10bac6f87074693df5.jpg',tags:['Story Rich','Emotional','Survival','Post-Apocalyptic','Stealth','Dual Perspective','Brutal','Divisive'],overview:`The Last of Us Part II is one of gaming's most audacious and divisive narratives — a sequel that deliberately subverts player expectations about heroism, revenge, and moral clarity. Five years after the original, Ellie and Joel are living in Jackson, Wyoming, when a traumatic event sends Ellie on a cross-country path of vengeance.\n\n  What distinguishes TLOU2 is its insistence on inhabiting multiple perspectives — forcing players to experience the story through the eyes of characters they initially oppose. This structural choice generated significant controversy but also represents one of the most ambitious narrative experiments in mainstream game design.\n\n  Technically, the game is PlayStation 4's finest achievement — animation quality, environmental detail, and AI behavior all set new benchmarks. Combat is viscerally brutal by design, making violence feel costly and morally weighted rather than empowering. Naughty Dog's commitment to its own vision, regardless of audience expectation, marks TLOU2 as a genuinely important work.`,features:[{icon:'🎭',title:'Dual Perspective',desc:'Play as both Ellie and Abby across the same event — a structurally bold narrative experiment.'},{icon:'🌿',title:'Seattle Setting',desc:'An overgrown, gorgeously detailed Seattle provides the backdrop for the game\'s central conflict.'},{icon:'🐕',title:'Dog AI',desc:'Enemy dogs can track Ellie by scent — a tense, unprecedented stealth mechanic.'},{icon:'🔧',title:'Weapon Upgrades',desc:'Expanded crafting and upgrade trees across pistols, rifles, bows, and explosives.'},{icon:'🧗',title:'Traversal',desc:'Rope-swinging, crawling, and prone stealth add new dimensions to navigation and evasion.'},{icon:'🎵',title:'Gustavo Santaolalla',desc:'The returning composer delivers an equally haunting follow-up score.'}],scores:[{label:'Metacritic',val:93,color:'#5b4fff'},{label:'OpenCritic',val:93,color:'#7c6bff'},{label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},{label:'The Guardian',val:100,color:'#10b981'},{label:'User Score',val:57,color:'#ef4444'}],reviews:[{outlet:'IGN',score:'10/10',reviewer:'Tom Marks',text:'The Last of Us Part II is a masterful, challenging, and unforgettable game that demands much of its players — emotionally and mechanically — and rewards them with one of the most impactful stories in the medium.'},{outlet:'GameSpot',score:'10/10',reviewer:'Kallie Plagge',text:'The Last of Us Part II succeeds because of its ambition, not despite it. It is a game that trusts its audience enough to challenge them at every level, and the result is something genuinely important.'},{outlet:'The Guardian',score:'5/5',reviewer:'Jordan Erica Webber',text:'Extraordinary. TLOU2 refuses to offer comfort or easy answers, demanding instead that players engage fully with its moral complexity. That difficulty is precisely what makes it essential.'}],awards:[{icon:'🏆',title:'Game of the Year',org:'The Game Awards 2020'},{icon:'🌟',title:'Best Narrative',org:'The Game Awards 2020'},{icon:'🎮',title:'Best Performance',org:'The Game Awards 2020'},{icon:'🏅',title:'Most Accessible Game',org:'BAFTA Games 2021'},{icon:'🌍',title:'GOTY – 300+ outlets',org:'Multiple Publications'},{icon:'💡',title:'Best Action Game',org:'The Game Awards 2020'}],sysreq:{min:{OS:'PS4 / PS5',CPU:'PS4: AMD Jaguar 8-core',RAM:'8 GB GDDR5',GPU:'PS4: AMD GCN 1.84 TFLOPS',Storage:'100 GB'},rec:{OS:'PlayStation 5',CPU:'PS5: AMD Zen 2 3.5GHz',RAM:'16 GB GDDR6',GPU:'PS5: AMD RDNA 2 10.28 TFLOPS',Storage:'100 GB SSD'}},trivia:['TLOU2 received a record 261 Game of the Year awards from media outlets — the most ever at the time.','The game took 7 years to develop following the original, with Naughty Dog\'s largest team yet.','The game\'s user score controversy sparked significant industry discussion about review bombing and critical consensus.','Every infected and human enemy has a unique name visible when you target them — reinforcing the weight of each death.']},
+
+'fortnite':{rank:9,title:'Fortnite',dev:'Epic Games',publisher:'Epic Games',year:2017,genre:'Battle Royale',subgenre:'Construction Shooter',rating:8.5,score:85,platforms:['PS','Xbox','PC','Switch','Mobile'],img:'https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/06/fornite_splash_image.jpg',tags:['Battle Royale','Free-to-Play','Building','Pop Culture','Competitive','Live Events','Crossover','Cultural Icon'],overview:`Fortnite is a cultural phenomenon that transcends the boundaries of gaming. Launched as a co-op survival game in 2017, Epic Games pivoted to add a free-to-play Battle Royale mode that detonated across global culture with unprecedented speed.\n\n  What distinguished Fortnite from competitors was its building mechanic — players can harvest materials and construct walls, ramps, and structures mid-combat, adding a vertical, architectural dimension to gunplay that no other battle royale replicated convincingly. Combined with Epic's extraordinary live-event strategy — in-game concerts by Travis Scott and Ariana Grande, movie tie-in events, and ongoing seasonal map transformations — Fortnite became a living platform rather than a static game.\n\n  With over 350 million registered accounts and peak concurrent player counts exceeding 12 million, Fortnite's influence on the industry — from the battle pass monetization model to the concept of the game-as-platform — cannot be overstated.`,features:[{icon:'🏗️',title:'Building Combat',desc:'Harvest materials to build defensive structures, ramps, and towers mid-battle — unique to Fortnite.'},{icon:'🎪',title:'Live Events',desc:'Unprecedented in-game live events — concerts, story moments, and map transformations watched by millions.'},{icon:'🎭',title:'Crossover Content',desc:'Collaborations with Marvel, DC, Star Wars, NFL, musicians, and virtually every major IP.'},{icon:'🗺️',title:'Evolving Map',desc:'The island constantly transforms between seasons — entire biomes appear, disappear, and return evolved.'},{icon:'🎮',title:'Battle Pass',desc:'Popularized the season-based Battle Pass model now used across virtually the entire industry.'},{icon:'🆓',title:'Free-to-Play',desc:'Completely free to play with cosmetic-only monetization — no pay-to-win mechanics.'}],scores:[{label:'Metacritic (PC)',val:81,color:'#5b4fff'},{label:'OpenCritic',val:82,color:'#7c6bff'},{label:'IGN',val:82,color:'#ef4444'},{label:'GameSpot',val:80,color:'#f59e0b'},{label:'Eurogamer',val:85,color:'#10b981'},{label:'User Score',val:78,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'8.2/10',reviewer:'Ryan McCaffrey',text:'Fortnite\'s Battle Royale is compelling precisely because building introduces a skill ceiling unlike any other game in the genre. It\'s accessible, frantic, and endlessly replayable.'},{outlet:'Eurogamer',score:'Recommended',reviewer:'Christian Donlan',text:'There is nothing quite like Fortnite. Its blend of construction and battle royale combat creates moments of absurdity and brilliance that no other game in the genre can match.'},{outlet:'PC Gamer',score:'80/100',reviewer:'James Davenport',text:'Fortnite is a legitimately excellent battle royale whose building mechanics give it a ceiling of skill and creativity that PUBG and its ilk simply cannot match.'}],awards:[{icon:'🏆',title:'Best Free-to-Play Game',org:'The Game Awards 2018'},{icon:'🌟',title:'Cultural Phenomenon',org:'TIME Magazine Coverage'},{icon:'🎮',title:'Most Registered Accounts',org:'350M+ Epic Games 2023'},{icon:'🏅',title:'Best Mobile Game',org:'Multiple Awards 2018'},{icon:'🌍',title:'Travis Scott Concert: 12M',org:'Peak Concurrent Players'},{icon:'💡',title:'Industry Model Change',org:'Battle Pass Popularized'}],sysreq:{min:{OS:'Windows 10 64-bit',CPU:'Core i3-3225 3.3GHz',RAM:'8 GB',GPU:'Intel HD 4000',Storage:'15 GB'},rec:{OS:'Windows 11 64-bit',CPU:'Core i7-8700 / AMD Ryzen 7 3700X',RAM:'16 GB',GPU:'NVIDIA RTX 3070 / AMD RX 6700 XT',Storage:'15 GB SSD'}},trivia:['The Travis Scott Astronomical concert event in April 2020 was attended by 12.3 million concurrent players — a record for any in-game event.','Fortnite Chapter 1\'s black hole event in October 2019 took the entire game offline for 36 hours, generating 1.5 billion social media impressions.','Epic Games\' legal battle with Apple over App Store policies began after Fortnite was removed from iOS in 2020 for violating payment rules.','The game\'s "emote" system — particularly the Floss dance — generated significant legal debate about choreography copyright.']},
+
+'halo-ce':{rank:10,title:'Halo: Combat Evolved',dev:'Bungie',publisher:'Microsoft Game Studios',year:2001,genre:'FPS',subgenre:'Sci-Fi Shooter',rating:9.4,score:94,platforms:['Xbox','PC'],img:'https://static1.srcdn.com/wordpress/wp-content/uploads/2020/03/Halo-Combat-Evolved-.jpg',tags:['FPS','Sci-Fi','Console Shooter','Co-op','Classic','Flood','Covenant','Master Chief'],overview:`Halo: Combat Evolved is the game that proved console first-person shooters were not just viable but could define the genre. Launched alongside the original Xbox in November 2001, it was a system seller of the highest order and the beginning of one of gaming's most beloved franchises.\n\n  Set on a mysterious ring-world called Halo, the game placed players in the armor of Master Chief — a super-soldier of enigmatic humanity — against two alien threats: the Covenant, a religious empire, and the Flood, a parasitic organism of cosmic horror. The narrative, unfolding across the alien installation's varied biomes, delivered genuine science-fiction storytelling of a caliber the FPS genre had rarely achieved.\n\n  Bungie's design innovations were numerous: recharging shields eliminated the frustration of health management; a two-weapon limit created tactical decision-making; vehicle sections introduced scale; and the Warthog jeep allowed genuine vehicular combat. Split-screen co-op at launch made it a social phenomenon in living rooms worldwide.`,features:[{icon:'🛡️',title:'Recharging Shields',desc:'Pioneered the now-universal shield recharge system that eliminated health pack management.'},{icon:'🔫',title:'Two-Weapon Limit',desc:'Carrying only two weapons at a time forced constant tactical decision-making.'},{icon:'🚗',title:'Vehicle Combat',desc:'Warthog jeep and Ghost sections introduced large-scale vehicular combat to console shooters.'},{icon:'👾',title:'The Flood',desc:'A mid-game enemy type reveal that dramatically shifted the game\'s tone toward survival horror.'},{icon:'👥',title:'Split-Screen Co-op',desc:'Full campaign playable in two-player split-screen — a defining social experience of the era.'},{icon:'🎵',title:'Marty O\'Donnell Score',desc:'The iconic Halo Theme — performed by a Gregorian choir — is one of gaming\'s most recognizable compositions.'}],scores:[{label:'Metacritic (Xbox)',val:97,color:'#5b4fff'},{label:'OpenCritic',val:95,color:'#7c6bff'},{label:'IGN',val:97,color:'#ef4444'},{label:'GameSpot',val:97,color:'#f59e0b'},{label:'Edge Magazine',val:100,color:'#10b981'},{label:'PC Gamer',val:90,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.7/10',reviewer:'Fran Mirabella III',text:'Halo: Combat Evolved is simply the finest first-person shooter to grace a console. Its scale, its story, its control, and its multiplayer combine into an experience that redefines what the genre is capable of.'},{outlet:'GameSpot',score:'9.7/10',reviewer:'Jeff Gerstmann',text:'Halo is a remarkable achievement. It proves definitively that console shooters can be compelling, deep, and varied — and that the Xbox has at least one killer app worthy of the platform.'},{outlet:'Edge',score:'10/10',reviewer:'Edge Staff',text:'Extraordinary. Halo: Combat Evolved does not merely deliver an excellent shooter — it expands what the FPS genre is and establishes a template that will be studied for decades.'}],awards:[{icon:'🏆',title:'System Seller of the Year',org:'Xbox Launch 2001'},{icon:'🌟',title:'Best Console Shooter',org:'Multiple Publications 2001'},{icon:'🎮',title:'Game of the Year',org:'Multiple Awards 2001'},{icon:'🏅',title:'Xbox\'s Defining Title',org:'Historical Recognition'},{icon:'🌍',title:'Franchise Launched',org:'Multiple Sequels & Media'},{icon:'💡',title:'Co-op Design Award',org:'Gaming Legacy Recognition'}],sysreq:{min:{OS:'Windows XP/Vista/7',CPU:'1GHz or faster processor',RAM:'256 MB',GPU:'32MB DirectX 8.1 compatible GPU',Storage:'1.2 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i5 / AMD Ryzen 5 (via MCC)',RAM:'8 GB',GPU:'NVIDIA GTX 1060 / AMD RX 480',Storage:'55 GB (MCC Complete)'}},trivia:['Halo CE was originally planned as a Mac/PC real-time strategy game before Bungie was acquired by Microsoft and it was reimagined as an Xbox FPS.','The "Silent Cartographer" level — a beach assault followed by a vast interior — is cited by design experts as one of the greatest individual game levels ever created.','Master Chief\'s face is never revealed in any mainline Halo game — a deliberate design choice to allow player projection.',"Martin O'Donnell composed the iconic Halo Theme in under a day, inspired by Bungie's visual style and Greek choir music."]},
+
+// Simplified but complete entries for remaining games
+'mario-odyssey':{rank:11,title:'Super Mario Odyssey',dev:'Nintendo EPD',publisher:'Nintendo',year:2017,genre:'Platformer',subgenre:'3D Collectathon',rating:9.4,score:94,platforms:['Switch'],img:'https://samurai-gamers.com/wp-content/uploads/2017/10/sg-super-mario-odyssey-walkthrough-and-guide.jpg',tags:['Platformer','Colorful','Family','Collectathon','Cappy','Kingdoms','Nintendo','Joyful'],overview:`Super Mario Odyssey is Nintendo's masterclass in platformer design — a joyful, technically dazzling open-world 3D platformer that introduced Cappy, a hat companion that grants Mario the ability to capture and inhabit enemies, objects, and creatures.\n\n  The capture mechanic opened a design space of extraordinary breadth. Playing as a T-Rex, a Bullet Bill, an electrical tower, or a lake monster — each control differently, each enables different puzzle solutions. The game's 17 kingdoms span wildly diverse themes, from a sun-baked Mexican-inspired desert to a photorealistic human city that contrasts beautifully with Mario's cartoon proportions.\n\n  Super Mario Odyssey is one of the purest expressions of Nintendo's design philosophy: every mechanic serves joy, every corner hides a surprise, and every kingdom is crafted with love for the player's sense of discovery. Its ending alone — a joyful, extended victory lap — is among gaming's most delightful final acts.`,features:[{icon:'🎩',title:'Cappy System',desc:'Throw Cappy to capture enemies and objects, each with unique movement and abilities.'},{icon:'🌍',title:'17 Kingdoms',desc:'Each kingdom has a unique theme, visual style, and set of mechanical puzzles to solve.'},{icon:'🌕',title:'880 Power Moons',desc:'Hundreds of Power Moons hidden in every corner — far more than required, enabling exploration at your pace.'},{icon:'🎵',title:'Jump Up, Super Star!',desc:'Musical sequences within levels where Mario dances to original songs — a Nintendo first.'},{icon:'2D',title:'Retro Sections',desc:'Hidden pipes transport Mario into flat 2D sections styled after the original NES games.'},{icon:'👑',title:'Post-Game',desc:'A massive additional challenge unlocked after completion — the Mushroom Kingdom returns.'}],scores:[{label:'Metacritic',val:97,color:'#5b4fff'},{label:'OpenCritic',val:97,color:'#7c6bff'},{label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},{label:'Eurogamer',val:100,color:'#10b981'},{label:'Game Informer',val:98,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'10/10',reviewer:'Jose Otero',text:'Super Mario Odyssey is a genre-defining achievement. The Cappy mechanic alone is worth the price of admission, and Nintendo uses it with a creative generosity that makes every kingdom feel like a new game.'},{outlet:'GameSpot',score:'10/10',reviewer:'Peter Brown',text:'One of the finest platformers ever made. Mario Odyssey is packed to the brim with ideas, executed with Nintendo\'s characteristic precision, and wrapped in an aesthetic of pure, irresistible joy.'},{outlet:'Eurogamer',score:'Essential',reviewer:'Oli Welsh',text:'Extraordinary. Super Mario Odyssey is Nintendo at its most uninhibited — a celebration of everything the platformer genre can be, and a new benchmark for the form.'}],awards:[{icon:'🏆',title:'Best Platformer',org:'The Game Awards 2017'},{icon:'🌟',title:'Best Family Game',org:'The Game Awards 2017'},{icon:'🎮',title:'GOTY Runner-Up',org:'Multiple Publications 2017'},{icon:'🏅',title:'Best Nintendo Game',org:'Multiple Awards 2017'},{icon:'🌍',title:'Best New Mechanic',org:'Industry Recognition'},{icon:'💡',title:'Most Joyful Game',org:'Countless Publications'}],sysreq:{min:{OS:'Nintendo Switch System Software',CPU:'Nintendo Switch SoC',RAM:'4 GB',GPU:'Nvidia Tegra X1',Storage:'5.7 GB'},rec:{OS:'Nintendo Switch (OLED Model)',CPU:'Nintendo Switch SoC',RAM:'4 GB',GPU:'Nvidia Tegra X1 (docked 1080p)',Storage:'5.7 GB + microSD'}},trivia:['Cappy was designed first — Nintendo built entire kingdoms around the mechanic after realizing its potential.','There are 880 Power Moons in the game — far more than the ~120 required to complete it, enabling completionists dozens of additional hours.','The New Donk City festival sequence — with Mayor Pauline singing "Jump Up, Super Star!" — features every major 2D Mario game as a musical callback.']},
+
+'dark-souls':{rank:13,title:'Dark Souls',dev:'FromSoftware',publisher:'Bandai Namco',year:2011,genre:'Action-RPG',subgenre:'Soulslike',rating:9.3,score:93,platforms:['PS','Xbox','PC'],img:'https://upload.wikimedia.org/wikipedia/en/8/8d/Dark_Souls_Cover_Art.jpg',tags:['Soulslike','Challenging','Dark Fantasy','Interconnected World','Cryptic Lore','Boss Fights','Covenant','Fire'],overview:`Dark Souls spawned a genre. Hidetaka Miyazaki's follow-up to Demon's Souls refined and expanded the demanding, deliberate action-RPG formula into a game of extraordinary structural brilliance — Lordran, its interconnected world, remains one of gaming's greatest achievements in three-dimensional level design.\n\n  Every area in Lordran connects to every other without a loading screen, flowing organically from the undead asylum to Firelink Shrine, through the Undead Burg, down into Blighttown, up to Anor Londo, and out into the Duke's Archives. Discovering a new shortcut that loops back to a previously visited bonfire is among gaming's most satisfying feelings.\n\n  The game's combat — measured, deliberate, unforgiving — demanded a new contract with the player: attention, patience, and learning from death. Its cryptic lore, communicated through item descriptions and environmental detail rather than explicit narrative, created a community of dedicated researchers whose collective decoding of Lordran's history continues to this day.`,features:[{icon:'🌍',title:'Interconnected World',desc:'Lordran\'s seamlessly connected world — no loading screens between areas — is a marvel of 3D design.'},{icon:'⚔️',title:'Deliberate Combat',desc:'Every swing, block, and roll is weighted and measured — combat rewards patience and positional awareness.'},{icon:'🔥',title:'Bonfire System',desc:'Bonfires serve as checkpoints, respawn points, and fast travel hubs — the game\'s central mechanical metaphor.'},{icon:'📖',title:'Cryptic Lore',desc:'Story delivered through item descriptions and environment — pieced together by a passionate community.'},{icon:'🏰',title:'45+ Bosses',desc:'Each boss demands specific strategies, punishing aggression and rewarding careful study.'},{icon:'👥',title:'Co-op & Invasion',desc:'Summon allies or invade other players\' worlds for asymmetric multiplayer of elegant design.'}],scores:[{label:'Metacritic (PS3)',val:89,color:'#5b4fff'},{label:'OpenCritic',val:91,color:'#7c6bff'},{label:'IGN',val:90,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},{label:'Eurogamer',val:100,color:'#10b981'},{label:'Edge Magazine',val:100,color:'#3b82f6'}],reviews:[{outlet:'Eurogamer',score:'10/10',reviewer:'Tom Bramwell',text:'Dark Souls is one of the most important games ever made. It redefines what difficulty means in games, proving that challenge and accessibility are not opposites, and creating a world of extraordinary coherence and depth.'},{outlet:'Edge',score:'10/10',reviewer:'Edge Staff',text:'A masterpiece. Dark Souls demands more of its players than almost any game in recent memory, and repays that investment with an experience of rare depth, atmosphere, and satisfaction.'},{outlet:'IGN',score:'9/10',reviewer:'Anthony Gallegos',text:'Dark Souls is exceptional. Its world design is the finest in the genre, its combat is deeply satisfying once mastered, and its atmosphere is unlike anything else in gaming.'}],awards:[{icon:'🏆',title:'Genre-Defining Title',org:'Industry Historical Recognition'},{icon:'🌟',title:'Best Design',org:'Multiple Publications 2011'},{icon:'🎮',title:'Innovation Award',org:'GDC Awards 2012'},{icon:'🏅',title:'Spawned a Genre',org:'The Soulslike Category'},{icon:'🌍',title:'Community Achievement',org:'Ongoing Lore Research'},{icon:'💡',title:'Excellence in Design',org:'Academic Study Subject'}],sysreq:{min:{OS:'Windows 7 SP1 64-bit',CPU:'Intel Core i5-2300 / AMD A8-3870',RAM:'4 GB',GPU:'NVIDIA GTX 465 / AMD HD 6870',Storage:'4 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7 / AMD Ryzen 5',RAM:'8 GB',GPU:'NVIDIA GTX 1060 / AMD RX 580',Storage:'4 GB SSD'}},trivia:['Dark Souls was a spiritual successor to Demon\'s Souls — Miyazaki directed it with new publisher Bandai Namco after From\'s internal reshuffling.','The game\'s iconic "YOU DIED" screen has become a meme representing any difficult challenge in popular culture.','Lordran\'s map was designed with a physical 3D model before any digital work began — ensuring all connections made logical spatial sense.']},
+
+// Continuing with concise but complete remaining games
+'cyberpunk':{rank:14,title:'Cyberpunk 2077',dev:'CD Projekt Red',publisher:'CD Projekt',year:2020,genre:'Action-RPG',subgenre:'Cyberpunk / Open World',rating:8.7,score:87,platforms:['PS','Xbox','PC'],img:'https://wallpapers.com/images/hd/cyberpunk-2077-s-megacity-5120x1440-gaming-orf4szuc1q3lmad5.jpg',tags:['Cyberpunk','Open World','Night City','RPG','Keanu Reeves','Redemption Story','Neon','First Person'],overview:`Cyberpunk 2077 is gaming's most remarkable redemption story. After a catastrophic launch plagued by bugs — particularly on last-generation consoles — CD Projekt Red spent two years rebuilding the game through patches, delivering on the original promise with version 2.0 and the Phantom Liberty expansion.\n\n  Night City — the game's setting — stands as one of gaming's greatest world-building achievements regardless of launch controversy. A neon-drenched West Coast megalopolis of six distinct districts, each with their own architecture, subcultures, and political dynamics, it creates the most convincing vision of a near-future dystopia the medium has produced.\n\n  Players inhabit V, a mercenary whose brain becomes entangled with the personality engram of legendary rockerboy Johnny Silverhand (voiced and motion-captured by Keanu Reeves). Their dynamic — an internal conflict between two identities sharing one body — drives a narrative of genuine philosophical depth about identity, legacy, and what it means to live a meaningful life.`,features:[{icon:'🏙️',title:'Night City',desc:'Six distinct districts of extraordinary density — arguably gaming\'s most realized future city.'},{icon:'🎭',title:'Johnny Silverhand',desc:'Keanu Reeves\'s motion-captured performance as the rebellious rockerboy is central to the narrative.'},{icon:'🔧',title:'V3 Build System',desc:'The 2.0 update completely overhauled the perk and build systems, enabling unprecedented depth.'},{icon:'🚗',title:'Vehicle Combat',desc:'Drive and shoot from vehicles — a feature added and refined substantially post-launch.'},{icon:'🕵️',title:'Braindance',desc:'Relive recorded memories through cybernetic implants to gather information and evidence.'},{icon:'🌃',title:'Phantom Liberty',desc:'An espionage expansion set in Dogtown featuring exceptional spy thriller storytelling.'}],scores:[{label:'Metacritic (PC)',val:86,color:'#5b4fff'},{label:'OpenCritic',val:85,color:'#7c6bff'},{label:'IGN (2.0)',val:90,color:'#ef4444'},{label:'GameSpot',val:70,color:'#f59e0b'},{label:'Eurogamer',val:80,color:'#10b981'},{label:'PC Gamer (2.0)',val:93,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9/10 (v2.0)',reviewer:'Tom Marks',text:'With version 2.0 and Phantom Liberty, Cyberpunk 2077 has become the game it always wanted to be. Night City is extraordinary, V\'s story is compelling, and the build depth now rivals the best in the RPG genre.'},{outlet:'PC Gamer',score:'93/100 (2.0)',reviewer:'Mollie Taylor',text:'The Cyberpunk 2077 of 2023 is a genuinely exceptional open-world RPG. The journey from broken launch to this point is unprecedented in the industry, and the destination is absolutely worth visiting.'},{outlet:'Eurogamer',score:'Recommended (2.0)',reviewer:'Ed Nightingale',text:'Night City deserves to be experienced. After two years of work, CD Projekt Red has delivered something truly remarkable from the ashes of one of gaming\'s most troubled launches.'}],awards:[{icon:'🏆',title:'Best RPG (Phantom Liberty)',org:'The Game Awards 2023'},{icon:'🌟',title:'Comeback of the Year',org:'Industry Recognition 2023'},{icon:'🎮',title:'Best World Design',org:'Multiple Publications'},{icon:'🏅',title:'Best Performance (Reeves)',org:'Multiple Awards Bodies'},{icon:'🌍',title:'21M+ Copies Sold',org:'CD Projekt Red 2023'},{icon:'💡',title:'Most Improved Game',org:'Community Recognition'}],sysreq:{min:{OS:'Windows 10 64-bit',CPU:'Intel Core i5-3570K / AMD FX-8310',RAM:'8 GB',GPU:'NVIDIA GTX 1060 6GB / AMD RX 580 8GB',Storage:'70 GB SSD'},rec:{OS:'Windows 11 64-bit',CPU:'Intel Core i7-6700K / AMD Ryzen 5 3600',RAM:'16 GB',GPU:'NVIDIA RTX 2060 / AMD RX 5700 XT',Storage:'70 GB SSD'}},trivia:['The initial PS4 launch version was so poor that Sony pulled the game from the PlayStation Store — unprecedented for a major AAA title.','Keanu Reeves personally approved every line of Johnny Silverhand\'s dialogue and spent months in motion capture.','Night City contains approximately 2 million individual dialogue lines — the largest recorded dialogue set of any game to date.']},
+
+'sekiro':{rank:15,title:'Sekiro: Shadows Die Twice',dev:'FromSoftware',publisher:'Activision',year:2019,genre:'Action',subgenre:'Samurai / Soulslike',rating:9.3,score:93,platforms:['PS','Xbox','PC'],img:'https://www.allkeyshop.com/blog/wp-content/uploads/sekiro-shadows-die-twice-banner2.jpg',tags:['Samurai','Precision Combat','Feudal Japan','Challenging','Stealth','Shinobi','Posture','Parry'],overview:`Sekiro: Shadows Die Twice represents FromSoftware's most mechanically refined combat system — a deliberate departure from the Soulsborne formula toward pure precision swordsmanship. Set in a fictionalized Sengoku-period Japan of supernatural elements, players inhabit Wolf, a shinobi tasked with rescuing his kidnapped lord from a corrupted clan.\n\n  Where Dark Souls rewarded patience and stamina management, Sekiro rewards aggression and perfect timing. Its Posture system — where both Wolf and enemies have a Posture meter that breaks through sustained pressure and perfect deflections — creates sword duels of extraordinary tension. Landing a Deathblow on a major boss after learning their rhythm over dozens of attempts is among gaming's most cathartic experiences.\n\n  The stealth system, grappling hook traversal, and shinobi tool arsenal — shuriken, flame vents, firecrackers — provide tactical variety, but the game's heart is its dueling. FromSoftware created something genuinely unique: a combat system with the mechanical depth of a fighting game embedded in a world-class action-adventure.`,features:[{icon:'⚔️',title:'Posture System',desc:'Manage the Posture meter of both Wolf and enemies through deflections and pressure to land Deathblows.'},{icon:'🪝',title:'Grappling Hook',desc:'A shinobi grappling hook enables rapid vertical traversal and dramatic aerial approaches.'},{icon:'🎎',title:'Shinobi Tools',desc:'Equippable prosthetic tools — shuriken, flame vent, spear, firecracker — for tactical variety.'},{icon:'🕵️',title:'Stealth System',desc:'Approach encounters through stealth to gain positional advantages and backstab Deathblows.'},{icon:'🏯',title:'Sengoku Japan',desc:'A meticulously crafted supernatural version of feudal Japan — shrines, castles, forests, and cliffs.'},{icon:'🐍',title:'Giant Bosses',desc:'Colossal bosses including a divine dragon tree and an enormous serpent deity demand creative approaches.'}],scores:[{label:'Metacritic',val:90,color:'#5b4fff'},{label:'OpenCritic',val:91,color:'#7c6bff'},{label:'IGN',val:100,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},{label:'Eurogamer',val:90,color:'#10b981'},{label:'Game Informer',val:95,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'10/10',reviewer:'Tom Marks',text:'Sekiro is FromSoftware\'s most accomplished game yet. Its combat demands everything from you and delivers rewards of extraordinary satisfaction. The duels in this game are unlike anything else in the medium.'},{outlet:'GameSpot',score:'9/10',reviewer:'Phil Hornshaw',text:'Sekiro\'s commitment to its specific vision of sword combat makes it the most mechanically precise FromSoftware title yet — and its world is among their most beautifully realized.'},{outlet:'Eurogamer',score:'Essential',reviewer:'Bertie Purchese',text:'Extraordinary. Sekiro is a game that demands you meet it on its own terms, and when you do, the rewards — the perfect deflections, the decisive Deathblows — are genuinely transcendent.'}],awards:[{icon:'🏆',title:'Game of the Year',org:'The Game Awards 2019'},{icon:'🌟',title:'Best Action Game',org:'The Game Awards 2019'},{icon:'🎮',title:'Best Art Direction',org:'The Game Awards 2019'},{icon:'🏅',title:'Best Game Direction',org:'The Game Awards 2019'},{icon:'🌍',title:'GOTY – 100+ outlets',org:'Multiple Publications 2019'},{icon:'💡',title:'Best Combat System',org:'Industry Recognition'}],sysreq:{min:{OS:'Windows 10 64-bit',CPU:'Intel Core i3-2100 / AMD FX-6300',RAM:'4 GB',GPU:'NVIDIA GTX 760 / AMD Radeon HD 7950',Storage:'12.5 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i5-2500K / AMD Ryzen 5 3600',RAM:'8 GB',GPU:'NVIDIA GTX 1070 / AMD RX 5700',Storage:'12.5 GB SSD'}},trivia:['Sekiro won four major categories at The Game Awards 2019 — GOTY, Best Action, Best Art Direction, and Best Game Direction — a rare sweep.','Miyazaki has cited samurai film director Akira Kurosawa as a major influence on Sekiro\'s combat choreography.','The game\'s final boss, Isshin, Saint of Swords, is widely considered one of the greatest boss encounters in the history of action games.']},
+
+'cod-mw2':{rank:16,title:'Call of Duty: Modern Warfare 2',dev:'Infinity Ward',publisher:'Activision',year:2009,genre:'FPS',subgenre:'Military Shooter',rating:9.0,score:90,platforms:['PS','Xbox','PC'],img:'https://images.hdqwalls.com/wallpapers/call-of-duty-modern-warfare-2-campaign-remastered-4k-vw.jpg',tags:['FPS','Military','Multiplayer','Campaign','Killstreaks','Spec Ops','Classic','No Russian'],overview:`Call of Duty: Modern Warfare 2 is the apex of the classic Call of Duty era — a title that sold over 22 million copies and represented the high watermark of the franchise's cultural dominance. Building on the groundbreaking original Modern Warfare, Infinity Ward delivered a more ambitious, more spectacle-driven campaign while simultaneously refining the multiplayer formula to what many still consider its ultimate form.\n\n  The multiplayer suite — with its expanded killstreak system (Predator Missile, AC-130, tactical nuke), map design of studied excellence, and perk tree of genuine strategic depth — created an experience of addictive, finely tuned competitive play that dominated living rooms and game nights for years. Maps like Terminal, Highrise, Rust, and Favela remain in the community's collective memory as benchmarks of the genre.\n\n  The campaign, while shorter than the first Modern Warfare, delivered unforgettable set-pieces — including the controversial "No Russian" airport mission — across a global escalating conflict. Spec Ops mode added co-operative missions of excellent variety for players seeking team challenges.`,features:[{icon:'💥',title:'Killstreak System',desc:'Earn streaks for air strikes, Predator Missiles, Harriers, and the devastating tactical nuke.'},{icon:'🗺️',title:'Classic Maps',desc:'Terminal, Highrise, Rust, Favela — map designs of studied excellence that the community still loves.'},{icon:'🎮',title:'Spec Ops Mode',desc:'Co-operative mission mode providing a separate challenge layer outside campaign and multiplayer.'},{icon:'🌍',title:'Global Campaign',desc:'Set-pieces across Rio, Washington D.C., Afghanistan, and a submarine base in Russia.'},{icon:'✈️',title:'No Russian Mission',desc:'A controversial optional mission that generated unprecedented mainstream media coverage.'},{icon:'🔧',title:'Create-A-Class',desc:'An expanded class creation system with perks, secondary weapons, and equipment of genuine depth.'}],scores:[{label:'Metacritic (X360)',val:94,color:'#5b4fff'},{label:'OpenCritic',val:92,color:'#7c6bff'},{label:'IGN',val:95,color:'#ef4444'},{label:'GameSpot',val:95,color:'#f59e0b'},{label:'Edge Magazine',val:80,color:'#10b981'},{label:'OXM',val:95,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.5/10',reviewer:'Ryan McCaffrey',text:'Modern Warfare 2 is the most complete Call of Duty game yet. Its multiplayer is the most refined and rewarding in the series, its campaign delivers spectacular set-pieces, and Spec Ops adds genuine co-operative value.'},{outlet:'GameSpot',score:'9.5/10',reviewer:'Chris Watters',text:'A landmark in the FPS genre. Modern Warfare 2\'s multiplayer is extraordinary — perfectly balanced, creatively designed, and endlessly replayable. A defining game of its generation.'},{outlet:'OXM',score:'9.5/10',reviewer:'OXM Staff',text:'The most polished, complete, and addictive shooter on the market. Modern Warfare 2\'s multiplayer alone justifies the price multiple times over.'}],awards:[{icon:'🏆',title:'Best Shooter',org:'Spike VGAs 2009'},{icon:'🌟',title:'Best Multiplayer',org:'Multiple Publications 2009'},{icon:'🎮',title:'22M+ Copies Sold',org:'Activision Records'},{icon:'🏅',title:'Game of the Year',org:'Multiple Publications 2009'},{icon:'🌍',title:'Fastest-Selling 2009',org:'NPD Sales Records'},{icon:'💡',title:'Multiplayer Legacy',org:'Still Played 15 Years Later'}],sysreq:{min:{OS:'Windows XP/Vista/7',CPU:'Intel Core 2 Duo E6600 / AMD Phenom X3 8750',RAM:'1 GB (XP) / 2 GB (Vista)',GPU:'NVIDIA 8600GT / ATI X1950',Storage:'12 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i5 / AMD Ryzen 5',RAM:'8 GB',GPU:'NVIDIA GTX 1060 / AMD RX 580',Storage:'12 GB SSD'}},trivia:['Modern Warfare 2 sold 4.7 million copies on its first day — breaking the entertainment industry record at the time.','The "No Russian" mission — in which players can participate in a terrorist airport massacre — caused parliamentary discussions in multiple countries about video game content.','The game\'s "tactical nuke" killstreak (25 kills) instantly ends the match — a reward so rare that online video compilations of people achieving it garnered millions of views.']},
+
+'overwatch':{rank:17,title:'Overwatch',dev:'Blizzard Entertainment',publisher:'Blizzard Entertainment',year:2016,genre:'FPS',subgenre:'Hero Shooter',rating:8.8,score:88,platforms:['PS','Xbox','PC'],img:'https://images4.alphacoders.com/553/thumb-1920-553496.jpg',tags:['Hero Shooter','Team-Based','Competitive','Colorful','Esports','Lore-Rich','Diverse Cast','Seasonal'],overview:`Overwatch revitalized team-based competitive shooters for a new generation, introducing the hero shooter genre to mainstream audiences with a cast of 30+ characters of extraordinary diversity, playability, and lore depth. Blizzard's first new IP in nearly two decades, it became one of the fastest-growing games in history upon launch.\n\n  The game's design philosophy — diverse heroes with wildly distinct abilities, each filling a role within a team structure — created a deep meta-game of counter-picking and composition that sustained enormous professional esports scenes globally. Characters ranged from barrier tank Reinhardt to time-reversal healer Mercy to sniper Widowmaker, each demanding different skills and enabling different play styles.\n\n  Overwatch's visual design set a new standard for character artistry in games — each hero instantly readable, culturally distinct, and possessed of a rich backstory conveyed through animated shorts of exceptional quality. The game has since transitioned to Overwatch 2, a free-to-play model, though the original's legacy as a defining esports and pop culture phenomenon is secure.`,features:[{icon:'🦸',title:'35+ Heroes',desc:'A diverse roster spanning tanks, supports, and damage heroes — each with unique ability sets.'},{icon:'🎯',title:'Role Queue',desc:'Structured matchmaking ensuring team compositions are balanced across tank, support, and DPS roles.'},{icon:'🌍',title:'Global Maps',desc:'Assault, Escort, Hybrid, and Control maps set across beautifully designed global locations.'},{icon:'🎬',title:'Animated Shorts',desc:'High-quality animated shorts expanding the game\'s rich lore — watched hundreds of millions of times.'},{icon:'🏆',title:'Overwatch League',desc:'A city-based professional esports league with franchised teams across the world.'},{icon:'🎨',title:'Distinctive Art Style',desc:'A Pixar-influenced aesthetic that made every hero immediately iconic and recognizable.'}],scores:[{label:'Metacritic (PC)',val:91,color:'#5b4fff'},{label:'OpenCritic',val:90,color:'#7c6bff'},{label:'IGN',val:95,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},{label:'Eurogamer',val:95,color:'#10b981'},{label:'PC Gamer',val:93,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.5/10',reviewer:'Vince Ingenito',text:'Overwatch is a landmark achievement in multiplayer game design. Its cast of heroes is one of gaming\'s most diverse and well-designed, and the game beneath them is one of the most polished and rewarding team shooters ever made.'},{outlet:'PC Gamer',score:'93/100',reviewer:'Andy Kelly',text:'Exceptional. Overwatch brings the character-driven approach of fighting games to the team shooter — and the result is something genuinely new, endlessly playable, and thoroughly joyful.'},{outlet:'Eurogamer',score:'Essential',reviewer:'Rich Stanton',text:'Overwatch is brilliant. Blizzard has taken the team shooter and rebuilt it around hero characters of exceptional design, creating something that rewards deep play without punishing newcomers.'}],awards:[{icon:'🏆',title:'Game of the Year',org:'The Game Awards 2016'},{icon:'🌟',title:'Best Multiplayer',org:'The Game Awards 2016'},{icon:'🎮',title:'GOTY – Multiple outlets',org:'Multiple Publications 2016'},{icon:'🏅',title:'Best Esports Game',org:'The Game Awards 2016'},{icon:'🌍',title:'35M Players Year One',org:'Blizzard Records'},{icon:'💡',title:'Best Art Direction',org:'Multiple Awards 2016'}],sysreq:{min:{OS:'Windows 7/8/10 64-bit',CPU:'Intel Core i3 / AMD Phenom X3 8650',RAM:'4 GB',GPU:'NVIDIA GTX 460 / ATI HD 4850',Storage:'30 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7 / AMD Ryzen 7',RAM:'8 GB',GPU:'NVIDIA GTX 1060 / AMD RX 580',Storage:'30 GB SSD'}},trivia:['Overwatch was developed by a team that had mostly worked on cancelled Blizzard MMO Titan — key ideas and assets were repurposed from that project.','The "Play of the Game" highlight system became a viral content format on Twitch and YouTube, significantly driving early adoption.','Tracer — the game\'s cover character — was confirmed as gay in a 2016 comic, making her one of the first LGBTQ+ characters in a major gaming franchise.']},
+
+'league':{rank:18,title:'League of Legends',dev:'Riot Games',publisher:'Riot Games',year:2009,genre:'MOBA',subgenre:'Competitive Strategy',rating:8.5,score:85,platforms:['PC'],img:'https://images8.alphacoders.com/406/406806.png',tags:['MOBA','Competitive','Esports','Free-to-Play','Champions','Ranked','Team Strategy','5v5'],overview:`League of Legends is the world's most played PC game and the cornerstone of modern professional esports. Launched in 2009 as Riot Games' debut title, it refined the MOBA genre — pioneered by the Warcraft III custom map Defense of the Ancients — into a polished, free-to-play competitive experience accessible to newcomers but with the mechanical ceiling of a world-class competitive sport.\n\n  The game's 5v5 structure — three lanes, a jungle, and an objective-driven map — has remained remarkably consistent in 15 years of operation, demonstrating the robustness of its foundational design. With 165+ playable champions, each with unique abilities and playstyles, the meta-game of champion selection, composition, and counter-picking creates strategic depth that professional teams dedicate careers to mastering.\n\n  The World Championship — Worlds — has become one of esports' defining annual events, drawing peak viewership exceeding 73 million concurrent viewers. Riot Games has since expanded the universe through Arcane (an Emmy-winning Netflix animated series), Teamfight Tactics, Legends of Runeterra, and Valorant.`,features:[{icon:'⚔️',title:'165+ Champions',desc:'An ever-expanding roster of champions with distinct roles, abilities, and playstyles.'},{icon:'🗺️',title:'Summoners Rift',desc:'The iconic 5v5 map — three lanes, a jungle, and Baron Nashor — unchanged in its essence for 15 years.'},{icon:'🏆',title:'Ranked System',desc:'Iron through Challenger ranked ladder system supporting serious competitive play at every level.'},{icon:'🎯',title:'Objective Control',desc:'Dragons, Baron, and towers — objective-focused gameplay that rewards team coordination over individual kills.'},{icon:'📺',title:'World Championship',desc:'Annual Worlds event with peak viewership of 73M — one of the most-watched esports events in history.'},{icon:'🎬',title:'Arcane Series',desc:'Emmy Award-winning Netflix animated series set in the League of Legends universe.'}],scores:[{label:'Metacritic',val:78,color:'#5b4fff'},{label:'OpenCritic',val:82,color:'#7c6bff'},{label:'IGN',val:80,color:'#ef4444'},{label:'GameSpot',val:80,color:'#f59e0b'},{label:'PC Gamer',val:90,color:'#10b981'},{label:'User Score',val:67,color:'#3b82f6'}],reviews:[{outlet:'PC Gamer',score:'90/100',reviewer:'Josh Augustine',text:'League of Legends is the most important PC game of the last decade. Its competitive depth, champion roster breadth, and the world-class ecosystem Riot has built around it make it one of the defining games of the era.'},{outlet:'IGN',score:'8/10',reviewer:'Charles Onyett',text:'League of Legends is an extremely polished MOBA that rewards deep play and team coordination. Its free-to-play model, accessible learning curve, and rich competitive scene make it endlessly compelling.'},{outlet:'GameSpot',score:'8/10',reviewer:'Kevin VanOrd',text:'A remarkable achievement in competitive game design. League of Legends combines accessibility with depth, offering something for both casual players and dedicated competitors.'}],awards:[{icon:'🏆',title:'Worlds 2023 Viewership',org:'73M Peak Concurrent'},{icon:'🌟',title:'Most Played PC Game',org:'15+ Years Running'},{icon:'🎮',title:'Arcane Emmy Award',org:'Netflix Series 2022'},{icon:'🏅',title:'Best Esports Game',org:'Multiple Awards Bodies'},{icon:'🌍',title:'165+ Champions',org:'Ongoing Development'},{icon:'💡',title:'Free-to-Play Pioneer',org:'Industry Model Influence'}],sysreq:{min:{OS:'Windows XP/Vista/7/8/10',CPU:'Intel Core i3 / AMD Ryzen 3',RAM:'4 GB',GPU:'NVIDIA GeForce 560 / AMD HD 6950',Storage:'16 GB'},rec:{OS:'Windows 10/11 64-bit',CPU:'Intel Core i5-3300 / AMD Ryzen 5 3600',RAM:'8 GB',GPU:'NVIDIA GTX 1050 Ti / AMD Radeon RX 560',Storage:'16 GB SSD'}},trivia:['The 2023 World Championship generated a peak viewership of 73 million concurrent viewers — more than any previous esports event.','Riot Games was acquired by Tencent in 2011 — a relationship that significantly accelerated the game\'s expansion into Asian markets.','The Arcane animated series won the Emmy for Outstanding Animated Program in 2022 — the first video game adaptation to win in that category.']},
+
+'among-us':{rank:20,title:'Among Us',dev:'InnerSloth',publisher:'InnerSloth',year:2018,genre:'Social Deduction',subgenre:'Party Game',rating:8.0,score:80,platforms:['PC','Mobile','Switch'],img:'https://gamingbolt.com/wp-content/uploads/2020/09/Among-Us.jpg',tags:['Social Deduction','Party','Multiplayer','Pandemic Hit','Deception','Crewmates','Imposter','Voice Chat'],overview:`Among Us is a study in how the simplest idea, arriving at the right moment, can become a global phenomenon. Released in 2018 to modest attention, it exploded in mid-2020 when pandemic lockdowns drove millions to seek social gaming experiences — and Twitch streamers including Disguised Toast, Pokimane, and AOC's Alexandria Ocasio-Cortez hosted sessions that generated hundreds of millions of views.\n\n  The game's premise is elegantly simple: a spaceship crew of up to 15 players must identify hidden Impostors among them through discussion, voting, and observational deduction. Impostors must sabotage the ship and eliminate Crewmates without being caught. Every game generates unique social dynamics of accusation, alliance, and deception that are impossible to script.\n\n  Among Us demonstrated that the most compelling game design isn't necessarily the most complex — and that the right social context can transform a modest indie title into a cultural touchstone.`,features:[{icon:'🚀',title:'Four Maps',desc:'The Skeld, MIRA HQ, Polus, and The Airship offer varied layouts and venting systems.'},{icon:'🔴',title:'Impostor Mechanics',desc:'Sabotage systems, venting, and murder mechanics designed to create paranoia and misdirection.'},{icon:'💬',title:'Discussion Voting',desc:'Emergency meetings enable group discussion and democratic voting to eject suspected Impostors.'},{icon:'🔧',title:'Tasks System',desc:'Crewmates complete visual and non-visual tasks — completion of all tasks wins the game.'},{icon:'🎭',title:'Roles Update',desc:'Added Engineer, Scientist, Guardian Angel, and Shapeshifter roles expanding strategic options.'},{icon:'🌐',title:'Cross-Platform',desc:'Seamless cross-platform play across PC, Mobile, Nintendo Switch, and consoles.'}],scores:[{label:'Metacritic (Switch)',val:85,color:'#5b4fff'},{label:'OpenCritic',val:83,color:'#7c6bff'},{label:'IGN',val:80,color:'#ef4444'},{label:'GameSpot',val:80,color:'#f59e0b'},{label:'TouchArcade',val:90,color:'#10b981'},{label:'Nintendo Life',val:70,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'8/10',reviewer:'Miranda Sanchez',text:'Among Us is a supremely social experience that thrives in group settings. Its simple premise generates complicated dynamics of trust, deception, and accusation that few game systems can match for pure social entertainment.'},{outlet:'GameSpot',score:'8/10',reviewer:'Jordan Ramée',text:'A brilliant social deduction game made extraordinary by its accessibility and the richness of the human dynamics it generates. No two games of Among Us are ever quite the same.'},{outlet:'TouchArcade',score:'9/10',reviewer:'Jared Nelson',text:'Among Us is the rare mobile game that works just as well — or better — in a group setting. Its simple mechanics create endlessly complex social situations.'}],awards:[{icon:'🏆',title:'Mobile Game of the Year',org:'Multiple Awards 2020'},{icon:'🌟',title:'Pandemic Cultural Phenomenon',org:'TIME/IGN Recognition'},{icon:'🎮',title:'Best Multiplayer',org:'Multiple Publications 2020'},{icon:'🏅',title:'500M+ Downloads',org:'InnerSloth Records'},{icon:'🌍',title:'AOC Twitch Stream',dest:'435K Concurrent Viewers'},{icon:'💡',title:'Social Gaming Pioneer',org:'Industry Recognition'}],sysreq:{min:{OS:'Windows 7 SP1+',CPU:'SSE2 instruction set support',RAM:'1 GB',GPU:'Graphics card with DX10 / OpenGL 3',Storage:'250 MB'},rec:{OS:'Windows 10 64-bit',CPU:'Any modern processor',RAM:'2 GB',GPU:'Any modern GPU',Storage:'500 MB'}},trivia:['Among Us was released in 2018 and had under 100 concurrent players for two years before suddenly exploding in August 2020.','InnerSloth is a three-person studio — the overnight success of Among Us required them to rapidly scale operations while simultaneously patching the game.','AOC\'s Among Us Twitch stream in October 2020 drew 435,000 concurrent viewers, one of the platform\'s highest counts at the time.']},
+
+'ff7':{rank:21,title:'Final Fantasy VII',dev:'Square',publisher:'Square / Sony',year:1997,genre:'RPG',subgenre:'JRPG',rating:9.5,score:95,platforms:['PS','PC'],img:'https://wallpapercave.com/wp/4Z9eXRH.jpg',tags:['JRPG','Classic','Story Rich','Materia System','Iconic','Aerith','Cloud','Sephiroth'],overview:`Final Fantasy VII is the game that brought Japanese role-playing games to a global audience and established the JRPG as a mainstream genre in Western markets. Released in 1997 for PlayStation, it was a technical and artistic landmark — the first mainline Final Fantasy in 3D, featuring pre-rendered backgrounds of cinematic quality and FMV sequences of unprecedented scope.\n\n  Cloud Strife, Aerith Gainsborough, Tifa Lockhart, and Sephiroth remain gaming's most culturally embedded characters — each recognizable to millions of people who have never played the game. The narrative — centered on a dystopian mega-corporation draining the planet's life force — was more sophisticated, more politically conscious, and more emotionally ambitious than any JRPG that preceded it.\n\n  The Materia magic system — equipping magical orbs to weapons and armor — provided strategic depth and character customization of extraordinary flexibility. The game's iconic twist (preserved deliberately unspoiled here) remains one of the most discussed narrative moments in gaming history. The Remake project — spanning multiple episodes — demonstrates how enduring the original's legacy remains.`,features:[{icon:'💎',title:'Materia System',desc:'Equip Materia orbs to weapons and armor to grant magical abilities — hundreds of combinations.'},{icon:'🌆',title:'Midgar',desc:'One of gaming\'s most iconic settings — a dystopian city of steel plates crushing the slums beneath.'},{icon:'⚔️',title:'Limit Breaks',desc:'Character-specific Limit Break abilities activated through sustained damage — visually spectacular.'},{icon:'🐦',title:'Chocobo Breeding',desc:'Breed and race Chocobos across multiple generations to unlock rare colored varieties and Materia.'},{icon:'🎮',title:'Minigames',desc:'Snowboarding, submarine battles, motorcycle chase, and Gold Saucer entertainment complex.'},{icon:'🎵',title:'Nobuo Uematsu',desc:'One of the greatest game soundtracks ever composed — Aerith\'s Theme is gaming\'s most emotional piece of music.'}],scores:[{label:'Metacritic (PSX)',val:92,color:'#5b4fff'},{label:'Famitsu',val:96,color:'#7c6bff'},{label:'IGN (Original)',val:96,color:'#ef4444'},{label:'GameSpot (Original)',val:96,color:'#f59e0b'},{label:'EGM',val:100,color:'#10b981'},{label:'Historical Impact',val:99,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.6/10 (original)',reviewer:'Andrew Vestal',text:'Final Fantasy VII is the greatest role-playing game ever made. Its story, characters, music, and presentation combine into an experience that transcends the medium and becomes something genuinely profound.'},{outlet:'GameSpot',score:'9.6/10 (original)',reviewer:'GameSpot Staff',text:'The best role-playing game available on any system. Final Fantasy VII sets a new standard for storytelling, presentation, and emotional depth in games that will influence the medium for decades.'},{outlet:'EGM',score:'10/10',reviewer:'EGM Staff',text:'A landmark achievement in every dimension — narrative, music, visual design, and systems depth. Final Fantasy VII is the most important RPG ever made.'}],awards:[{icon:'🏆',title:'JRPG of the Generation',org:'PS1 Era Recognition'},{icon:'🌟',title:'Brought JRPGs West',org:'Cultural Impact Award'},{icon:'🎮',title:'Nobuo Uematsu Score',org:'Music Legacy Recognition'},{icon:'🏅',title:'Remake – Multiple GOTYs',org:'Multiple Publications 2020'},{icon:'🌍',title:'13M+ Original Copies',org:'Sales Records'},{icon:'💡',title:'Most Requested Remake',org:'15 Years of Fan Campaigns'}],sysreq:{min:{OS:'Windows 7/8/10',CPU:'Intel Core 2 Duo 2.0GHz',RAM:'2 GB',GPU:'NVIDIA GeForce 5200 or better',Storage:'3 GB'},rec:{OS:'Windows 10 64-bit (Remake)',CPU:'Intel Core i7-8700 / AMD Ryzen 5 3600',RAM:'16 GB',GPU:'NVIDIA RTX 2080 / AMD RX 5700 XT',Storage:'100 GB SSD (Remake)'}},trivia:['The development of Final Fantasy VII required Square to switch from Nintendo to Sony — a seismic shift in the console wars with consequences that shaped the industry for years.','Aerith\'s death scene — which cannot be prevented regardless of player choices — remains gaming\'s most discussed narrative moment after nearly 30 years.','The 1997 PlayStation marketing campaign in the US was the most expensive ever mounted for a video game at the time — $100 million globally.']},
+
+'half-life2':{rank:22,title:'Half-Life 2',dev:'Valve',publisher:'Valve',year:2004,genre:'FPS',subgenre:'Sci-Fi Shooter',rating:9.6,score:96,platforms:['PC'],img:'https://cdn.neowin.com/news/images/uploaded/2024/11/1731709897_hl2wallpaper02_16x9.jpg',tags:['FPS','Physics','Sci-Fi','Gravity Gun','Story Rich','No Cutscenes','City 17','Combine'],overview:`Half-Life 2 is perhaps the most technically and narratively sophisticated first-person shooter ever made. Released in 2004 after years of anticipation — and the theft and leaking of its source code in 2003 — it arrived as a statement of what the PC FPS could be: a seamlessly narrated, physics-driven, atmospherically extraordinary experience unlike anything the genre had produced.\n\n  Gordon Freeman returns in a dystopian future Earth under occupation by the alien Combine. City 17 — a Soviet-style city of suppression and quiet resistance — is one of gaming's greatest environmental achievements. The narrative unfolds without a single cutscene — all story beats delivered in real time while the player maintains control.\n\n  The Gravity Gun — which can grab, throw, and manipulate any physics object in the world — created emergent puzzle and combat possibilities of extraordinary breadth. Valve's Source engine, physically simulating every object in the game world, enabled interactions that felt genuinely new in 2004 and remain the benchmark against which physics implementations are measured.`,features:[{icon:'🔫',title:'Gravity Gun',desc:'Pick up, manipulate, and launch any physics object — saw blades, crates, explosive barrels, or enemies.'},{icon:'🎬',title:'No Cutscenes',desc:'The entire game\'s story unfolds in real time — Gordon never loses control, never sees a cut.'},{icon:'🏙️',title:'City 17',desc:'An extraordinarily realized dystopian Eastern European city under alien occupation.'},{icon:'🤖',title:'Combine AI',desc:'Enemy AI of exceptional sophistication — coordinating flanks, covering positions, and adapting to tactics.'},{icon:'🚗',title:'Vehicle Sections',desc:'Airboat and buggy sections provide exhilarating open-world travel across coastal highways and canals.'},{icon:'👾',title:'Ravenholm',desc:'An optional horror-inflected chapter through a zombie-overrun town — one of gaming\'s finest levels.'}],scores:[{label:'Metacritic',val:96,color:'#5b4fff'},{label:'OpenCritic',val:97,color:'#7c6bff'},{label:'IGN',val:97,color:'#ef4444'},{label:'GameSpot',val:96,color:'#f59e0b'},{label:'PC Gamer',val:96,color:'#10b981'},{label:'Edge Magazine',val:100,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.7/10',reviewer:'Douglass C. Perry',text:'Half-Life 2 is the greatest PC game ever made. Its combination of narrative sophistication, physics innovation, and sheer artistry of level design is unmatched. A landmark for the medium.'},{outlet:'Edge',score:'10/10',reviewer:'Edge Staff',text:'Half-Life 2 is extraordinary in every dimension — narrative, design, technology, atmosphere. Valve has delivered a sequel that exceeds the impossible expectations created by the original.'},{outlet:'PC Gamer',score:'96/100',reviewer:'Craig Pearson',text:'A triumph of game design. Half-Life 2 tells a story of oppression and resistance with a craft that most filmmakers would envy, played through mechanics of unprecedented physical sophistication.'}],awards:[{icon:'🏆',title:'GOTY – 39 publications',org:'Multiple Outlets 2004'},{icon:'🌟',title:'Best PC Game Ever',org:'Multiple Historical Rankings'},{icon:'🎮',title:'Technical Achievement',org:'GDC Awards 2005'},{icon:'🏅',title:'Source Engine Legacy',org:'Industry Foundation'},{icon:'🌍',title:'Steam Platform Launch',org:'Half-Life 2 Launch Title'},{icon:'💡',title:'Physics Benchmark',org:'Still Referenced Today'}],sysreq:{min:{OS:'Windows 7/10 64-bit',CPU:'1.7 GHz processor',RAM:'512 MB',GPU:'DirectX 8.1 level GPU',Storage:'15 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i5 / AMD Ryzen 5',RAM:'4 GB',GPU:'NVIDIA GTX 1050 / AMD RX 470',Storage:'15 GB SSD'}},trivia:['Half-Life 2\'s source code and assets were stolen and leaked online in 2003 — over a year before release. Valve\'s Gabe Newell personally addressed the incident in a community post.','Steam was launched specifically as the delivery platform for Half-Life 2 — its mandatory installation was initially controversial but proved visionary.','Alyx Vance is frequently cited as gaming\'s most realized female companion character and was the basis for the 2020 VR game Half-Life: Alyx.']},
+
+'mario-kart8':{rank:23,title:'Mario Kart 8 Deluxe',dev:'Nintendo EPD',publisher:'Nintendo',year:2017,genre:'Racing',subgenre:'Kart Racing',rating:9.2,score:92,platforms:['Switch'],img:'https://img-eshop.cdn.nintendo.net/i/c6746200f54a1b6f2626f0ccf911d94a57f98bfc1d06b158b59c32d8e13df9b2.jpg',tags:['Racing','Family','Multiplayer','Nintendo','Colorful','Kart','Anti-Grav','200cc'],overview:`Mario Kart 8 Deluxe is the best-selling Nintendo Switch game of all time with over 60 million copies sold — and the definitive kart racing experience. The Deluxe edition of the Wii U original added all DLC, a completely revamped battle mode, and the Booster Course Pass — 48 additional tracks spanning Mario Kart history — bringing the total to 96 courses.\n\n  The game's anti-gravity mechanic — allowing vehicles to race on walls and ceilings — introduced genuinely three-dimensional track design that dramatically expanded what the genre could be. Combined with refined items, an extraordinary soundtrack, and the flexible appeal of playing portably on Switch, Mario Kart 8 Deluxe has become a near-universal Switch purchase and the go-to party game for households worldwide.\n\n  With 96 courses, 38+ racers, multiple engine classes, online play for up to 12 players, and local wireless for 8 players, the sheer volume of content makes it the most complete kart racing package ever released.`,features:[{icon:'🏎️',title:'96 Tracks',desc:'The Booster Course Pass brought the total to 96 tracks — the largest Mario Kart circuit list in history.'},{icon:'🔄',title:'Anti-Gravity',desc:'Race on walls and ceilings — anti-gravity sections turn the tracks into three-dimensional roller coasters.'},{icon:'👥',title:'Local Multiplayer',desc:'Up to 4 players locally, 8 players via local wireless, 12 players online.'},{icon:'🐢',title:'Items System',desc:'Blue shells, red shells, Bullet Bills, Boomerangs — an evolved item system of gleeful chaos.'},{icon:'🏁',title:'200cc Mode',desc:'The fastest engine class — 200cc requires entirely different braking-based technique to master.'},{icon:'🎵',title:'Live Orchestra',desc:'Each track features an orchestral, often jazz-influenced Nintendo score of extraordinary quality.'}],scores:[{label:'Metacritic',val:92,color:'#5b4fff'},{label:'OpenCritic',val:93,color:'#7c6bff'},{label:'IGN',val:93,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},{label:'Eurogamer',val:90,color:'#10b981'},{label:'Nintendo Life',val:100,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.3/10',reviewer:'Brian Albert',text:'Mario Kart 8 Deluxe is the ultimate kart racing package. 96 tracks, polished mechanics, glorious local multiplayer, and a soundtrack of extraordinary quality make it the most complete the series has ever been.'},{outlet:'Eurogamer',score:'Essential',reviewer:'Martin Robinson',text:'Mario Kart 8 Deluxe is simply the best kart racer ever made. Its tracks are dazzling, its mechanics are refined, and its social appeal — around one Switch — is unmatched in the genre.'},{outlet:'Nintendo Life',score:'10/10',reviewer:'NL Staff',text:'The definitive version of the best Mario Kart ever made. With the Booster Course Pass, it has become an almost incomprehensibly complete racing package.'}],awards:[{icon:'🏆',title:'Best Sports/Racing Game',org:'The Game Awards 2017'},{icon:'🌟',title:'60M+ Copies Sold',org:'Nintendo\'s Best-Selling Switch Game'},{icon:'🎮',title:'Best Family Game',org:'Multiple Publications'},{icon:'🏅',title:'96-Track Collection',org:'Most Courses in Series History'},{icon:'🌍',title:'Best Local Multiplayer',org:'Multiple Awards Bodies'},{icon:'💡',title:'Switch Launch Essential',org:'Industry Recognition'}],sysreq:{min:{OS:'Nintendo Switch System Software',CPU:'Nintendo Switch SoC',RAM:'4 GB',GPU:'Nvidia Tegra X1',Storage:'8.4 GB'},rec:{OS:'Nintendo Switch (OLED)',CPU:'Nintendo Switch SoC',RAM:'4 GB',GPU:'Nvidia Tegra X1',Storage:'8.4 GB + microSD'}},trivia:['Mario Kart 8 Deluxe is Nintendo\'s best-selling Switch game ever — surpassing even Animal Crossing and Pokémon titles.','The Booster Course Pass added 48 tracks across 6 waves, mostly remasters of tracks from earlier Mario Kart games across all platforms.','The game\'s soundtrack features over 48 full orchestral recordings — Nintendo brought in a live orchestra for every track.']},
+
+'gtasan':{rank:24,title:'GTA: San Andreas',dev:'Rockstar North',publisher:'Rockstar Games',year:2004,genre:'Action',subgenre:'Open World Crime',rating:9.4,score:94,platforms:['PS','Xbox','PC'],img:'https://wallpaperaccess.com/full/3662276.jpg',tags:['Open World','Crime','Story Rich','Hip-Hop','Classic','CJ','Gang Life','Three Cities'],overview:`GTA: San Andreas was the most ambitious game of its era — a vast, sprawling love letter to early-90s California that somehow delivered on all of its staggering promises. Three cities (Los Santos, San Fierro, and Las Venturas), a countryside connecting them, and an RPG-depth progression system made it a game so large it required months to fully explore.\n\n  Carl "CJ" Johnson returns from Liberty City to his home of Los Santos after his mother's murder, finding his old gang — the Grove Street Families — in disarray. His journey to rebuild the gang, navigate corrupt police, and ultimately confront the conspiracy behind his mother's death drives a narrative of surprising emotional depth, filtered through the aesthetic of 90s hip-hop and gangster cinema.\n\n  San Andreas introduced RPG elements unprecedented for the series: CJ could gain weight through overeating, build muscle through gym workouts, acquire driving and flying skills, and level up criminal proficiencies. The cultural impact of its soundtrack — hip-hop, R&B, funk, and classic rock — remains profound two decades later.`,features:[{icon:'🌆',title:'Three Cities',desc:'Los Santos, San Fierro, and Las Venturas — three distinct city environments plus connecting countryside.'},{icon:'🏋️',title:'RPG Stats',desc:'Build CJ\'s muscle, stamina, driving, flying, and shooting skills through repeated actions.'},{icon:'🎵',title:'Legendary Soundtrack',desc:'11 radio stations spanning West Coast hip-hop, G-funk, R&B, country, and classic rock.'},{icon:'🚗',title:'200+ Vehicles',desc:'Bicycles, lowriders, monster trucks, helicopters, jetpacks, and even a harvester.'},{icon:'🏠',title:'Property System',desc:'Buy properties, businesses, and assets across all three cities to generate passive income.'},{icon:'✈️',title:'Flight School',desc:'Earn a pilot\'s license to access airports and aircraft — a complete gameplay progression layer.'}],scores:[{label:'Metacritic (PS2)',val:95,color:'#5b4fff'},{label:'OpenCritic',val:94,color:'#7c6bff'},{label:'IGN',val:99,color:'#ef4444'},{label:'GameSpot',val:93,color:'#f59e0b'},{label:'Edge Magazine',val:90,color:'#10b981'},{label:'OPM',val:100,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.9/10',reviewer:'Erik Brudvig',text:'Grand Theft Auto: San Andreas is a stunning achievement. No game has ever delivered this much content at this level of quality. Rockstar has not only topped themselves — they\'ve created the greatest open-world game ever made.'},{outlet:'GameSpot',score:'9.3/10',reviewer:'Jeff Gerstmann',text:'San Andreas is an enormous, enormously entertaining game that delivers more variety, more content, and more personality than anything Rockstar has done before. An essential purchase.'},{outlet:'OPM',score:'10/10',reviewer:'OPM Staff',text:'An absolute masterpiece of game design. San Andreas delivers more than any game on any platform — its world is vast, its systems deep, and its story genuinely moving.'}],awards:[{icon:'🏆',title:'Game of the Year',org:'Multiple Publications 2004'},{icon:'🌟',title:'Best PS2 Game',org:'Multiple Awards 2004'},{icon:'🎮',title:'Best Open World',org:'Historical Recognition'},{icon:'🏅',title:'Cultural Legacy',org:'2020s Nostalgia Wave'},{icon:'🌍',title:'27M+ Copies (PS2)',org:'Best-Selling PS2 Game'},{icon:'💡',title:'Soundtrack Impact',org:'Multiple Music Awards'}],sysreq:{min:{OS:'Windows XP/Vista/7/10',CPU:'1 GHz Intel Pentium III / AMD Athlon',RAM:'256 MB',GPU:'64MB DirectX 9.0 compatible',Storage:'4.7 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i5 / AMD Ryzen 5',RAM:'8 GB',GPU:'NVIDIA GTX 1060 / AMD RX 580',Storage:'4.7 GB SSD'}},trivia:['GTA: San Andreas was the best-selling PS2 game of all time, with 27.5 million copies sold on that platform alone.','The controversy surrounding the "Hot Coffee" modification — which unlocked explicit cut content — led to an ESRB re-rating and Congressional hearings on video game content.','CJ\'s actor Young Maylay was discovered by Rockstar through music connections — his authentic portrayal of CJ contributed significantly to the character\'s cultural resonance.']},
+
+'doom-eternal':{rank:25,title:'DOOM Eternal',dev:'id Software',publisher:'Bethesda Softworks',year:2020,genre:'FPS',subgenre:'Arena Shooter',rating:9.0,score:90,platforms:['PS','Xbox','PC','Switch'],img:'https://images.bauerhosting.com/legacy/media/5e70/f8b3/03ea/cb7b/8410/ac3d/doom-eternal-hero.jpg?ar=16:9&fit=crop&crop=top&auto=format&w=1440&q=80',tags:['FPS','Fast-Paced','Heavy Metal','Demons','Combat Mastery','Resource Management','Hell','Rip and Tear'],overview:`DOOM Eternal is the pinnacle of the modern arena shooter — a game of extraordinary mechanical complexity disguised beneath a veneer of pure, primal aggression. Where its 2016 predecessor introduced the push-forward combat philosophy, Eternal refined and deepened it into something demanding genuine mastery.\n\n  The central innovation is resource management: each enemy type drops a specific resource when dispatched in specific ways — Chainsaw kills replenish ammunition, Glory Kills restore health, Flame Belch fills armor. Running low on any resource during a fight requires switching tools and prioritizing targets accordingly. In expert hands, DOOM Eternal becomes a rhythmic, almost musical dance of violence — every weapon, every ability, every movement feeding into a system of extraordinary interconnection.\n\n  Mick Gordon's soundtrack — a genre-defining work of industrial metal and orchestral composition — perfectly mirrors the game's demanding intensity. The Ancient Gods DLC expanded the campaign with even more demanding encounters, earning acclaim independent of the base game.`,features:[{icon:'🔫',title:'Arsenal Depth',desc:'9 weapon archetypes each with two alternate modes — mastering all 18 functions is the game\'s true challenge.'},{icon:'⚡',title:'Resource Triangle',desc:'Chainsaw for ammo, Glory Kill for health, Flame Belch for armor — a self-sustaining resource loop.'},{icon:'👹',title:'Demon Knowledge',desc:'Each demon type has specific weak points and behaviors — learning them transforms combat from chaos to symphony.'},{icon:'🏋️',title:'Marauder',desc:'A mirror enemy that demands perfect timing and aggressive patience — DOOM Eternal\'s greatest test.'},{icon:'🎵',title:'Mick Gordon Score',desc:'One of gaming\'s most viscerally effective soundtracks — industrial metal timed to gameplay intensity.'},{icon:'🌍',title:'Hub World',desc:'The Fortress of Doom serves as an upgradeable hub between missions — with hidden rooms and lore.'}],scores:[{label:'Metacritic (PC)',val:88,color:'#5b4fff'},{label:'OpenCritic',val:89,color:'#7c6bff'},{label:'IGN',val:95,color:'#ef4444'},{label:'GameSpot',val:90,color:'#f59e0b'},{label:'Eurogamer',val:100,color:'#10b981'},{label:'PC Gamer',val:90,color:'#3b82f6'}],reviews:[{outlet:'Eurogamer',score:'Essential',reviewer:'Edwin Evans-Thirlwell',text:'DOOM Eternal is a masterpiece of combat design. Its systems are layered with extraordinary care, demanding everything from a player, and delivering rewards of near-musical satisfaction in return.'},{outlet:'IGN',score:'9.5/10',reviewer:'Tom Marks',text:'DOOM Eternal is the best single-player shooter in years. Its combat is deeper, faster, and more demanding than anything the genre has offered, and executing it perfectly is one of gaming\'s most satisfying experiences.'},{outlet:'GameSpot',score:'9/10',reviewer:'Tamoor Hussain',text:'A technical and mechanical triumph. DOOM Eternal\'s combat system has a ceiling of mastery that most games in any genre never approach.'}],awards:[{icon:'🏆',title:'Best Action Game',org:'The Game Awards 2020'},{icon:'🌟',title:'Best PC Game',org:'Multiple Publications 2020'},{icon:'🎮',title:'Best Shooter',org:'Multiple Awards 2020'},{icon:'🏅',title:'Mick Gordon Score',org:'Best Soundtrack Nominations'},{icon:'🌍',title:'Switch Port Achievement',org:'Technical Accomplishment'},{icon:'💡',title:'Combat Design Award',org:'Industry Recognition'}],sysreq:{min:{OS:'Windows 7/10 64-bit',CPU:'Intel Core i5 @ 3.3 GHz / AMD Ryzen 5',RAM:'8 GB',GPU:'NVIDIA GTX 970 4GB / AMD RX 470 8GB',Storage:'50 GB SSD'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7-6700K / AMD Ryzen 7 1800X',RAM:'8 GB',GPU:'NVIDIA RTX 2080 / AMD RX 5700 XT',Storage:'50 GB SSD'}},trivia:['Mick Gordon\'s score became the subject of a public dispute between the composer and Bethesda regarding mixing and album release — one of gaming\'s more unusual public falling-outs.','DOOM Eternal\'s Switch port was managed by Panic Button — the same studio that ported Wolfenstein II and Warframe to Switch in high-quality versions.','The game\'s "Rip and Tear" philosophy was derived directly from the original 1993 DOOM\'s internal design documents.']},
+
+'bloodborne':{rank:29,title:'Bloodborne',dev:'FromSoftware',publisher:'Sony Computer Entertainment',year:2015,genre:'Action-RPG',subgenre:'Gothic Horror',rating:9.2,score:92,platforms:['PS'],img:'https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/02/0_0007_bloodborne.jpg',tags:['Gothic Horror','Soulslike','Lovecraftian','Fast Combat','Atmosphere','Yharnam','Chalice Dungeons','Cosmic Horror'],overview:`Bloodborne is FromSoftware's most stylistically distinctive and atmospherically oppressive work — a Gothic horror action-RPG set in a city consumed by a plague that transforms its citizens into monstrous beasts. Yharnam is one of gaming's greatest environmental achievements: a Victorian city of cobblestone, gas lamps, and crumbling grandeur that conceals nightmares behind every door.\n\n  The combat represents a deliberate inversion of the Souls philosophy. Where Dark Souls rewards caution and deliberate defense, Bloodborne punishes hesitation — shields are largely useless, and the Rally system allows players to reclaim lost health by immediately attacking the enemy that dealt the damage. The result is a frenetic, aggressive combat system that feels utterly distinctive.\n\n  The narrative's Lovecraftian cosmic horror dimension — gradually revealed through item descriptions, environmental clues, and late-game reveals — ranks among gaming's most sophisticated examples of eldritch storytelling. The Old Hunters DLC, widely considered even stronger than the base game, adds essential areas and boss encounters that rank among FromSoftware's finest.`,features:[{icon:'🩸',title:'Rally System',desc:'Regain lost health by attacking immediately after being hit — rewarding aggression over defense.'},{icon:'🔫',title:'Trick Weapons',desc:'Transforming weapons shift between two combat forms with distinct move sets — guns support parrying.'},{icon:'🏛️',title:'Chalice Dungeons',desc:'Procedurally generated optional dungeons with unique loot and boss encounters.'},{icon:'🌙',title:'Insight System',desc:'Gathering Insight changes what you can perceive — affecting enemy appearances and revealing hidden truths.'},{icon:'😱',title:'Cosmic Horror',desc:'The true nature of Yharnam\'s affliction is revealed as something far beyond mere beast plague.'},{icon:'🎩',title:'Old Hunters DLC',desc:'An expansion widely considered exceptional even by Bloodborne\'s standards — essential content.'}],scores:[{label:'Metacritic',val:92,color:'#5b4fff'},{label:'OpenCritic',val:92,color:'#7c6bff'},{label:'IGN',val:97,color:'#ef4444'},{label:'GameSpot',val:100,color:'#f59e0b'},{label:'Eurogamer',val:100,color:'#10b981'},{label:'Game Informer',val:95,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.7/10',reviewer:'Marty Sliva',text:'Bloodborne is FromSoftware\'s masterpiece. Its atmosphere is oppressive and magnificent, its combat faster and more demanding than any of its predecessors, and Yharnam is one of gaming\'s great settings.'},{outlet:'GameSpot',score:'10/10',reviewer:'Scott Butterworth',text:'Extraordinary. Bloodborne is terrifying, exhilarating, and artistically extraordinary — FromSoftware operating at the absolute peak of their considerable powers.'},{outlet:'Eurogamer',score:'Essential',reviewer:'Edwin Evans-Thirlwell',text:'Bloodborne is an essential experience. Its world is like nothing in games — a Lovecraftian nightmare of beauty and dread that demands to be explored, suffered through, and ultimately understood.'}],awards:[{icon:'🏆',title:'Best PS4 Exclusive',org:'Multiple Publications 2015'},{icon:'🌟',title:'Best Action Game',org:'Multiple Awards 2015'},{icon:'🎮',title:'Best Art Direction',org:'Multiple Awards 2015'},{icon:'🏅',title:'GOTY Runner-Up',org:'Multiple Publications 2015'},{icon:'🌍',title:'Most Atmospheric Game',org:'Community Recognition'},{icon:'💡',title:'Old Hunters DLC GOTY',org:'Considered Standalone Quality'}],sysreq:{min:{OS:'PlayStation 4',CPU:'AMD Jaguar 8-core',RAM:'8 GB GDDR5',GPU:'AMD GCN 1.84 TFLOPS',Storage:'50 GB'},rec:{OS:'PlayStation 5 (via BC)',CPU:'AMD Zen 2 3.5GHz',RAM:'16 GB',GPU:'AMD RDNA 2 10.28 TFLOPS',Storage:'50 GB SSD'}},trivia:['Bloodborne was created as a collaboration between FromSoftware and Sony Japan Studio — giving Miyazaki freedom to pursue a non-fantasy setting with full platform exclusivity support.','There has been no PC port of Bloodborne despite years of fan petitions — it remains one of the most requested ports in the medium.','The Doll in the Hunter\'s Dream is the most beloved NPC in the Soulsborne series — her gentle, maternal presence contrasts devastatingly with Yharnam\'s horror.']},
+
+'pubg':{rank:12,title:'PUBG: Battlegrounds',dev:'Krafton',publisher:'Krafton',year:2017,genre:'Battle Royale',subgenre:'Tactical Shooter',rating:8.2,score:82,platforms:['PS','Xbox','PC','Mobile'],img:'https://wstatic-prod.pubg.com/web/live/static/og/img-og-pubg.jpg',tags:['Battle Royale','Tactical','Survival','Competitive','Realistic','Ballistics','Erangel','Loot'],overview:`PUBG: Battlegrounds invented the modern battle royale genre as we know it — before Fortnite popularized it, before Apex refined it, Brendan "PlayerUnknown" Greene's vision of 100 players dropped onto an island to be the last one standing created the template that every subsequent battle royale followed.\n\n  Released in Steam Early Access in 2017, PUBG's commitment to realistic ballistics, authentic military equipment, and tactical gameplay on vast, detailed maps created a tense survival experience defined by every decision mattering. Bullet drop, weapon recoil patterns, and vehicle sound cues all required genuine knowledge to exploit — elevating skilled players in ways more arcade-oriented competitors could not.\n\n  PUBG Global Championship remains one of the most financially rewarding esports tournaments in the genre, with prize pools exceeding $3 million. The game's mobile version, PUBG Mobile, became one of the highest-grossing mobile games in history, demonstrating the breadth of the original's appeal.`,features:[{icon:'🗺️',title:'7 Maps',desc:'Erangel, Miramar, Sanhok, Vikendi, Karakin, Taego, and Deston — each with distinct tactical dynamics.'},{icon:'🔫',title:'Realistic Ballistics',desc:'True bullet drop, wind, and recoil patterns reward detailed weapon knowledge.'},{icon:'🚗',title:'Vehicle Strategy',desc:'Vehicles provide mobility but create noise and visibility — using them is a calculated tactical risk.'},{icon:'🎽',title:'Loot System',desc:'Randomized loot spawns ensure no two runs begin with the same equipment — adaptive strategy required.'},{icon:'⭕',title:'Blue Zone',desc:'The shrinking play area forces increasing confrontation — circle positioning is a crucial skill.'},{icon:'🏆',title:'PUBG Esports',desc:'PUBG Global Championship with $3M+ prize pools and massive regional circuit infrastructure.'}],scores:[{label:'Metacritic (PC)',val:86,color:'#5b4fff'},{label:'OpenCritic',val:82,color:'#7c6bff'},{label:'IGN',val:87,color:'#ef4444'},{label:'GameSpot',val:70,color:'#f59e0b'},{label:'PC Gamer',val:89,color:'#10b981'},{label:'User Score',val:66,color:'#3b82f6'}],reviews:[{outlet:'PC Gamer',score:'89/100',reviewer:'Samuel Roberts',text:'PUBG is the most tense, most rewarding, and most distinctively designed survival game I have played. Its commitment to tactical realism over arcade accessibility creates moments of genuine strategic satisfaction.'},{outlet:'IGN',score:'8.7/10',reviewer:'Ryan McCaffrey',text:'PUBG is a remarkable achievement in tension design. Every safe zone shift, every gunshot, every vehicle noise creates escalating paranoia that no other game in its genre quite replicates.'},{outlet:'Eurogamer',score:'Recommended',reviewer:'Oli Welsh',text:'Absolutely worth playing. PUBG\'s tactical depth and the genuine satisfaction of surviving against 99 other players is unmatched — even as competitors polish the formula it pioneered.'}],awards:[{icon:'🏆',title:'Invented the Genre',org:'Battle Royale Category'},{icon:'🌟',title:'Best PC Game',org:'Multiple Publications 2017'},{icon:'🎮',title:'Steam Record: 3.2M',org:'Peak Concurrent Players 2018'},{icon:'🏅',title:'Free-to-Play Transition',org:'2022 — New Player Record'},{icon:'🌍',title:'PUBG Mobile: #1',org:'Highest Grossing Mobile 2020'},{icon:'💡',title:'Genre Inventor',org:'All Battle Royales Indebted'}],sysreq:{min:{OS:'Windows 10 64-bit',CPU:'Intel Core i5-4430 / AMD FX-6300',RAM:'8 GB',GPU:'NVIDIA GTX 960 2GB / AMD R9 380 2GB',Storage:'40 GB SSD'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7-4770K / AMD Ryzen 5 3600',RAM:'16 GB',GPU:'NVIDIA RTX 2060 / AMD RX 5700',Storage:'40 GB SSD'}},trivia:['At its peak in January 2018, PUBG had 3.24 million concurrent Steam players — a record that stood for years.','Brendan Greene previously developed battle royale mods for ARMA 2 and ARMA 3 before partnering with Bluehole (now Krafton) to develop PUBG.','PUBG Mobile has been downloaded over 1 billion times and remains one of the highest-grossing mobile games globally.']},
+
+'ac-odyssey':{rank:28,title:"Assassin's Creed: Odyssey",dev:'Ubisoft Quebec',publisher:'Ubisoft',year:2018,genre:'Action-RPG',subgenre:'Ancient Greece',rating:8.5,score:85,platforms:['PS','Xbox','PC'],img:'https://wallpaperaccess.com/full/1110180.jpg',tags:['Open World','Greek Mythology','RPG','Naval Combat','Choice-Driven','Ancient Greece','Eagle Bearer','Mercenaries'],overview:`Assassin's Creed: Odyssey represents the franchise's most ambitious transformation — from stealth-action series to fully-fledged open-world RPG, set in a breathtakingly recreated ancient Greece of extraordinary scale and visual splendor.\n\n  Players choose between Alexios and Kassandra — a mercenary descended from the Spartan king Leonidas — navigating a world of city-states, mythological monsters, and political intrigue across the Peloponnesian War. The choice-driven dialogue system, branching quest lines, and multiple endings represented the most narrative flexibility the series had offered.\n\n  Greece itself is the game's greatest achievement — covering 130 square kilometers of mountain ranges, island archipelagos, city-states from Athens to Sparta, and a naval system of considerable depth. The mythology layer — confronting Cyclops, Medusa, and the Minotaur in optional questlines — added supernatural scope to an already enormous world. With 100+ hours of content, Odyssey remains Ubisoft's most expansive open-world achievement.`,features:[{icon:'⚡',title:'Kassandra/Alexios',desc:'Choose your Eagle Bearer — both fully voiced with complete story arcs and relationship paths.'},{icon:'🌊',title:'Naval Combat',desc:'Command a trireme across the Aegean, ramming enemy ships and launching crew in boarding actions.'},{icon:'🐍',title:'Mythological Quests',desc:'Encounter and defeat Medusa, the Minotaur, the Cyclops, and the Sphinx in dedicated questlines.'},{icon:'⚔️',title:'Mercenary System',desc:'A hierarchy of mercenaries pursue you based on your Bounty level — create rivalries and take contracts.'},{icon:'🗺️',title:'130 km² Map',desc:'The largest map in Assassin\'s Creed history — islands, mountains, cities, and underwater ruins.'},{icon:'🎭',title:'Dialogue Choices',desc:'Branching dialogue with relationship consequences affecting story outcomes and NPC reactions.'}],scores:[{label:'Metacritic (PC)',val:85,color:'#5b4fff'},{label:'OpenCritic',val:86,color:'#7c6bff'},{label:'IGN',val:95,color:'#ef4444'},{label:'GameSpot',val:80,color:'#f59e0b'},{label:'Eurogamer',val:80,color:'#10b981'},{label:'Game Informer',val:90,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'9.5/10',reviewer:'Dan Stapleton',text:'Assassin\'s Creed Odyssey is an extraordinary achievement in open-world RPG design. Ancient Greece is a stunning playground, Kassandra is one of gaming\'s most compelling protagonists, and the sheer volume of quality content is staggering.'},{outlet:'Game Informer',score:'9/10',reviewer:'Suriel Vazquez',text:'Odyssey is the most ambitious and content-rich Assassin\'s Creed game yet. Ancient Greece is brought to remarkable life, and the RPG systems are deep enough to sustain well over a hundred hours of play.'},{outlet:'GameSpot',score:'8/10',reviewer:'Kallie Plagge',text:'A spectacular setting and genuinely compelling protagonist make Odyssey one of the strongest entries in the series, despite some over-familiar structural bloat.'}],awards:[{icon:'🏆',title:'Best RPG',org:'The Game Awards 2018'},{icon:'🌟',title:'Best Open World',org:'Multiple Publications 2018'},{icon:'🎮',title:'Best Protagonist (Kassandra)',org:'Community Awards 2018'},{icon:'🏅',title:'Most Improved Franchise',org:'Multiple Publications'},{icon:'🌍',title:'130km² Greece Realized',org:'Largest AC Map'},{icon:'💡',title:'Setting of the Year',org:'Multiple Awards Bodies'}],sysreq:{min:{OS:'Windows 7 SP1/8.1/10 64-bit',CPU:'Intel Core i5-2400 / AMD FX-6350',RAM:'8 GB',GPU:'NVIDIA GTX 660 / AMD R9 285',Storage:'46 GB'},rec:{OS:'Windows 10 64-bit',CPU:'Intel Core i7-6700K / AMD Ryzen 5 1600',RAM:'16 GB',GPU:'NVIDIA GTX 1070 / AMD RX Vega 64',Storage:'46 GB SSD'}},trivia:['The map of Assassin\'s Creed Odyssey covers 130 square kilometers — Ubisoft\'s historical research team spent months ensuring geographical and architectural accuracy.','Kassandra was the canonical protagonist according to creative director Jonathan Dumont, though Alexios was marketed more prominently for commercial reasons.','The game\'s Discovery Tour mode allows players to explore ancient Greece without combat, used by educational institutions as a historical teaching tool.']},
+
+'fifa23':{rank:30,title:'FIFA Series',dev:'EA Sports (now EA FC)',publisher:'Electronic Arts',year:2023,genre:'Sports',subgenre:'Football / Soccer',rating:7.8,score:78,platforms:['PS','Xbox','PC','Switch','Mobile'],img:'https://cdn1.epicgames.com/offer/f5deacee017b4b109476933f7dd2edbd/EGS_EASPORTSFIFA23StandardEdition_EACanada_S1_2560x1440-aaf9c5273c27a485f2cce8cb7e804f5c',tags:['Sports','Football','Ultimate Team','Competitive','Annual','Career Mode','Volta','World Cup'],overview:`The FIFA franchise — now rebranded EA Sports FC following the dissolution of the EA-FIFA partnership — is the world's most successful sports video game series with over 325 million copies sold across three decades. FIFA 23 was the final entry under the original license, featuring the first-ever simultaneous representation of both men's and women's World Cup tournaments in a FIFA game.\n\n  Ultimate Team — the card-collecting, squad-building mode introduced in FIFA 09 — became the franchise's primary revenue driver and cultural identity, generating billions annually through in-game purchases. Its combination of football management strategy and collectible card game mechanics created an addictive loop that dominates football gaming culture.\n\n  Career Mode received significant improvements in FIFA 23, including create-a-club functionality and more sophisticated player development systems. The gameplay itself, powered by HyperMotion2 technology capturing real match data from professional games, delivered the most physically authentic football simulation the series had achieved.`,features:[{icon:'⚽',title:'Ultimate Team',desc:'Build squads from player cards earned or purchased — the most-played mode and primary franchise identity.'},{icon:'🏆',title:'World Cup Modes',desc:'First FIFA to feature both men\'s and women\'s World Cups simultaneously as dedicated tournament modes.'},{icon:'🎮',title:'HyperMotion2',desc:'Motion capture technology using real match data to animate 6,000+ real football motion patterns.'},{icon:'👔',title:'Career Mode',desc:'Create-a-club functionality, improved player development, and more realistic manager simulation.'},{icon:'🏙️',title:'Volta Football',desc:'Street football mode set in global urban locations with skill tricks and 3v3 to 5v5 formats.'},{icon:'🌍',title:'30+ Leagues',desc:'700+ clubs and 30+ official leagues — the most comprehensive football license in gaming.'}],scores:[{label:'Metacritic (PS5)',val:78,color:'#5b4fff'},{label:'OpenCritic',val:77,color:'#7c6bff'},{label:'IGN',val:80,color:'#ef4444'},{label:'GameSpot',val:70,color:'#f59e0b'},{label:'Eurogamer',val:70,color:'#10b981'},{label:'User Score',val:53,color:'#3b82f6'}],reviews:[{outlet:'IGN',score:'8/10',reviewer:'Tristan Ogilvie',text:'FIFA 23 is the most feature-complete entry in the series\' history. HyperMotion2 produces genuinely more realistic football animation, Career Mode improvements are meaningful, and Ultimate Team remains compulsively engaging.'},{outlet:'GameSpot',score:'7/10',reviewer:'Phil Hornshaw',text:'FIFA 23 delivers on the pitch with its most authentic gameplay yet, even if it fails to address the structural concerns around Ultimate Team monetization that have dogged the series for years.'},{outlet:'Eurogamer',score:'3/5',reviewer:'Chris Tapsell',text:'An incremental step forward in an increasingly stagnant cycle. FIFA 23\'s football is good; its business model remains deeply problematic.'}],awards:[{icon:'🏆',title:'325M+ Copies Franchise',org:'Total Series Sales'},{icon:'🌟',title:'Final FIFA Branding',org:'Transitioned to EA FC 24'},{icon:'🎮',title:'Both World Cups',org:'Historic Dual License'},{icon:'🏅',title:'UT Revenue Record',org:'Highest Annual UT Revenue'},{icon:'🌍',title:'Most Licensed Sports Game',org:'700+ Clubs, 30+ Leagues'},{icon:'💡',title:'HyperMotion2',org:'Technical Innovation Award'}],sysreq:{min:{OS:'Windows 10/11 64-bit',CPU:'Intel Core i5-6600K / AMD Ryzen 5 1600',RAM:'8 GB',GPU:'NVIDIA GTX 970 / AMD RX 470',Storage:'100 GB'},rec:{OS:'Windows 10/11 64-bit',CPU:'Intel Core i7-6700 / AMD Ryzen 7 2700X',RAM:'12 GB',GPU:'NVIDIA RTX 2070 / AMD RX 5700 XT',Storage:'100 GB SSD'}},trivia:['The EA-FIFA licensing deal expired after FIFA 23 — EA rebranded to EA Sports FC, while FIFA sought other developers for future games under the FIFA name.','Ultimate Team generated approximately $1.62 billion in revenue for EA in fiscal year 2022 — representing nearly a third of the company\'s total digital revenue.','FIFA 23 was the first in the series to feature women\'s club football — with women\'s league teams from multiple countries including England\'s WSL and France\'s D1 Féminine.']}
+};
+
+/* ────────────────────────────────
+   UTILITY FUNCTIONS
+──────────────────────────────── */
+const PM_LABELS={PS:'PlayStation',Xbox:'Xbox',PC:'PC',Switch:'Switch',Mobile:'Mobile'};
+function rankClass(r){return r===1?'gold':r===2?'silver':r===3?'bronze':'';}
+function rankEmoji(r){return r===1?'🥇 ':r===2?'🥈 ':r===3?'🥉 ':'#';}
+
+function renderStars(rating){
+  let html='';const full=Math.round(rating/2);
+  for(let i=1;i<=5;i++) html+=`<span class="star ${i<=full?'filled':'empty'}">★</span>`;
+  return html;
+}
+function getRatingLabel(r){
+  if(r>=9.5)return'Masterpiece';if(r>=9.0)return'Outstanding';
+  if(r>=8.5)return'Excellent';if(r>=8.0)return'Great';return'Good';
+}
+
+function pbStyle(p){
+  const m={PS:'background:#e8f0fe;color:#1a56db;border:1px solid rgba(26,86,219,.2)',
+    Xbox:'background:#e8fdf0;color:#057a55;border:1px solid rgba(5,122,85,.2)',
+    PC:'background:#fff4e8;color:#c05621;border:1px solid rgba(192,86,33,.2)',
+    Switch:'background:#fde8e8;color:#c81e1e;border:1px solid rgba(200,30,30,.2)',
+    Mobile:'background:#e8f8fd;color:#0694a2;border:1px solid rgba(6,148,162,.2)'};
+  return m[p]||'background:#edeaff;color:#5b4fff;border:1px solid rgba(91,79,255,.2)';
+}
+
+function getRelated(id,game){
+  return Object.entries(GAMES)
+    .filter(([k,g])=>k!==id&&(g.genre===game.genre||g.dev===game.dev||g.platforms.some(p=>game.platforms.includes(p))))
+    .sort(()=>Math.random()-.5).slice(0,4);
+}
+
+/* ────────────────────────────────
+   RENDER
+──────────────────────────────── */
+function render(id){
+  const game=GAMES[id];
+  if(!game){
+    document.getElementById('mainContent').innerHTML=`<div class="not-found"><h2>Game not found</h2><p>We couldn't find that game in our archive.</p><a href="games.html" class="btn-primary" style="display:inline-flex">← Back to Games</a></div>`;
+    return;
+  }
+
+  document.title=`GameVerse – ${game.title}`;
+  document.getElementById('bc-title').textContent=game.title;
+
+  const circ=2*Math.PI*34;
+  const offset=circ*(1-game.score/100);
+  const scoreCol=game.score>=90?'#5b4fff':game.score>=80?'#7c6bff':'#9d85ff';
+  const rc=rankClass(game.rank);
+
+  const platforms=game.platforms.map(p=>`<div class="plat-badge" style="${pbStyle(p)}"><span class="pb-dot" style="background:${p==='PS'?'#1a56db':p==='Xbox'?'#057a55':p==='PC'?'#c05621':p==='Switch'?'#c81e1e':'#0694a2'};"></span>${PM_LABELS[p]||p}</div>`).join('');
+  const tags=game.tags.map(t=>`<span class="tag">${t}</span>`).join('');
+
+  const featureCards=(game.features||[]).map(f=>`<div class="feature-card"><div class="fc-icon">${f.icon}</div><div class="fc-title">${f.title}</div><div class="fc-desc">${f.desc}</div></div>`).join('');
+
+  const scoreItems=(game.scores||[]).map(s=>`<div class="score-item"><span class="si-label">${s.label}</span><div class="si-bar-wrap"><div class="si-bar" data-w="${s.val}" style="width:0%;background:${s.color}"></div></div><span class="si-num">${s.val}</span></div>`).join('');
+
+  const reviewCards=(game.reviews||[]).map(r=>`<div class="review-card"><div class="rv-header"><span class="rv-outlet">${r.outlet}</span><span class="rv-score">${r.score}</span></div><div class="rv-reviewer">By ${r.reviewer}</div><div class="rv-text">"${r.text}"</div><div class="rv-stars">★★★★★</div></div>`).join('');
+
+  const awardBadges=(game.awards||[]).map(a=>`<div class="award-badge"><div class="aw-icon">${a.icon}</div><div class="aw-title">${a.title}</div><div class="aw-org">${a.org}</div></div>`).join('');
+
+  const sr=game.sysreq||{};
+  const sysreqHTML=sr.min?`<div class="sysreq-grid">
+    <div class="sysreq-col"><div class="sysreq-type"><span>Minimum</span><span class="badge badge-min">MIN</span></div>
+      ${Object.entries(sr.min).map(([k,v])=>`<div class="sysreq-row"><span class="sr-key">${k}</span><span class="sr-val">${v}</span></div>`).join('')}
+    </div>
+    <div class="sysreq-col"><div class="sysreq-type"><span>Recommended</span><span class="badge badge-rec">REC</span></div>
+      ${Object.entries(sr.rec).map(([k,v])=>`<div class="sysreq-row"><span class="sr-key">${k}</span><span class="sr-val">${v}</span></div>`).join('')}
+    </div>
+  </div>`:'<p style="color:var(--muted);font-size:.85rem">Available on console — see platform for requirements.</p>';
+
+  const triviaItems=(game.trivia||[]).map((t,i)=>`<div class="trivia-item"><span class="ti-num">0${i+1}</span><p class="ti-text">${t}</p></div>`).join('');
+
+  const related=getRelated(id,game);
+  const relCards=related.map(([rid,rg],i)=>`<div class="rel-card" onclick="window.location='game-detail.html?id=${rid}'" style="animation-delay:${i*60}ms"><div class="rel-img"><img src="${rg.img}" alt="${rg.title}" onerror="this.style.opacity='.2'"/><div class="rel-img-overlay"></div></div><div class="rel-body"><div class="rel-rank">#${rg.rank} All Time</div><div class="rel-name">${rg.title}</div><div class="rel-meta"><span class="rel-genre">${rg.genre}</span><span class="rel-year">${rg.year}</span></div></div></div>`).join('');
+
+  const overviewParagraphs=(game.overview||'').trim().split('\n\n').map(p=>`<p>${p.trim()}</p>`).join('');
+
+  document.getElementById('mainContent').innerHTML=`
+  <!-- HERO -->
+  <section class="detail-hero">
+    <div class="img-col">
+      <div class="img-frame">
+        <img src="${game.img}" alt="${game.title}" onerror="this.style.opacity='.2'"/>
+        <div class="img-scan"></div>
+        <div class="img-overlay"></div>
+        <div class="img-rank-badge ${rc}">${rankEmoji(game.rank)} Rank #${game.rank} All Time</div>
+        <div class="img-genre">${game.genre} · ${game.subgenre}</div>
+      </div>
+      <div class="stat-tiles">
+        <div class="stat-tile" style="animation-delay:.06s"><div class="st-val">#${game.rank}</div><div class="st-lbl">All-Time Rank</div></div>
+        <div class="stat-tile" style="animation-delay:.1s"><div class="st-val">${game.year}</div><div class="st-lbl">Released</div></div>
+        <div class="stat-tile" style="animation-delay:.14s"><div class="st-val">${game.score}</div><div class="st-lbl">Metascore</div></div>
+        <div class="stat-tile" style="animation-delay:.18s"><div class="st-val">${game.platforms.length}</div><div class="st-lbl">Platforms</div></div>
+      </div>
+      <div class="media-strip" id="mediaStrip"></div>
+    </div>
+    <div class="info-col">
+      <div class="rank-chip"><span class="rc-dot"></span>🏆 Rank #${game.rank} All Time</div>
+      <h1 class="game-title">${game.title}</h1>
+      <div class="game-byline">
+        by <span class="byline-dev">${game.dev}</span>
+        <span class="byline-sep">·</span> ${game.publisher}
+        <span class="byline-sep">·</span> ${game.genre} / ${game.subgenre}
+        <span class="byline-sep">·</span> ${game.year}
+      </div>
+      <div class="star-row">
+        <div class="stars">${renderStars(game.rating)}</div>
+        <span class="rating-num">${game.rating}</span>
+        <span class="rating-max">/ 10</span>
+        <span class="rating-label">${getRatingLabel(game.rating)}</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="sec-label">Platforms Available</div>
+      <div class="platforms-row">${platforms}</div>
+      <div class="sec-label">Genre Tags</div>
+      <div class="tags-row">${tags}</div>
+      <div class="info-divider"></div>
+      <div class="sec-label">GameVerse Score</div>
+      <div class="score-section">
+        <div class="score-ring-wrap">
+          <svg class="score-ring-svg" viewBox="0 0 78 78">
+            <circle class="sr-track" cx="39" cy="39" r="34"/>
+            <circle class="sr-fill" id="srFill" cx="39" cy="39" r="34"
+              stroke="${scoreCol}" stroke-dashoffset="${circ}" data-target="${offset}"/>
+            <text class="sr-text" x="39" y="36" text-anchor="middle" fill="${scoreCol}">${game.score}</text>
+            <text class="sr-sub" x="39" y="48" text-anchor="middle" fill="#999">/100</text>
+          </svg>
+        </div>
+        <div class="score-desc"><p>${(game.overview||'').split('\n\n')[0].trim().substring(0,220)}…</p></div>
+      </div>
+      <div class="cta-row">
+        <a href="games.html" class="btn-secondary">← Back to Games</a>
+        <button class="btn-primary" onclick="addWishlist('${id}',this)">+ Add to Wishlist</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEEP INFO SECTIONS -->
+  <div class="sections-wrap">
+    <div class="info-section">
+      <div class="is-header"><div class="is-icon">📖</div><div class="is-title">Story & Overview</div></div>
+      <div class="story-text">${overviewParagraphs}</div>
+    </div>
+
+    ${featureCards?`<div class="info-section">
+      <div class="is-header"><div class="is-icon">⚙️</div><div class="is-title">Key Features & Gameplay</div></div>
+      <div class="features-grid">${featureCards}</div>
+    </div>`:''}
+
+    ${scoreItems?`<div class="info-section">
+      <div class="is-header"><div class="is-icon">📊</div><div class="is-title">Critical Scores</div></div>
+      <div class="scores-grid">${scoreItems}</div>
+    </div>`:''}
+
+    ${reviewCards?`<div class="info-section">
+      <div class="is-header"><div class="is-icon">✍️</div><div class="is-title">Critic Reviews</div></div>
+      <div class="reviews-list">${reviewCards}</div>
+    </div>`:''}
+
+    ${awardBadges?`<div class="info-section">
+      <div class="is-header"><div class="is-icon">🏆</div><div class="is-title">Awards & Recognition</div></div>
+      <div class="awards-grid">${awardBadges}</div>
+    </div>`:''}
+
+    <div class="info-section">
+      <div class="is-header"><div class="is-icon">💻</div><div class="is-title">System Requirements</div></div>
+      ${sysreqHTML}
+    </div>
+
+    ${triviaItems?`<div class="info-section">
+      <div class="is-header"><div class="is-icon">💡</div><div class="is-title">Did You Know?</div></div>
+      <div class="trivia-list">${triviaItems}</div>
+    </div>`:''}
+  </div>
+
+  <!-- RELATED -->
+  <section class="related-section">
+    <div class="rel-header">
+      <h2 class="rel-title">You Might Also Like</h2>
+      <a href="games.html" class="rel-see-all">See All Games →</a>
+    </div>
+    <div class="related-grid">${relCards}</div>
+  </section>`;
+
+  // Animate score ring
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    const el=document.getElementById('srFill');
+    if(el) el.style.strokeDashoffset=el.dataset.target;
+    // Animate score bars
+    document.querySelectorAll('.si-bar').forEach(b=>{b.style.width=b.dataset.w+'%';});
+  }));
+}
+
+function addWishlist(id,btn){
+  const g=GAMES[id];
+  const orig=btn.textContent;
+  btn.textContent='✓ Added to Wishlist!';
+  btn.style.background='#10b981';
+  btn.style.boxShadow='0 10px 30px rgba(16,185,129,.35)';
+  setTimeout(()=>{btn.textContent=orig;btn.style.background='';btn.style.boxShadow='';},2200);
+}
+
+// Init
+const params=new URLSearchParams(window.location.search);
+const gameId=params.get('id')||'gta5';
+render(gameId);
+
+// Particles
+const pc=document.getElementById('particles');
+['rgba(91,79,255,.13)','rgba(124,107,255,.1)','rgba(140,200,255,.09)','rgba(200,160,255,.08)'].forEach(c=>{
+  for(let i=0;i<5;i++){
+    const p=document.createElement('div');p.className='particle';
+    const s=Math.random()*8+4;
+    p.style.cssText=`width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:${c};animation-duration:${5+Math.random()*8}s;animation-delay:-${Math.random()*7}s;`;
+    pc.appendChild(p);
+  }
+});
+
+// Scroll bar
+window.addEventListener('scroll',()=>{
+  const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight)*100;
+  document.getElementById('scrollBar').style.width=Math.min(pct,100)+'%';
+},{passive:true});
+</script>
+</body>
+</html>

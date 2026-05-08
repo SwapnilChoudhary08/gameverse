@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GameVerse – All Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;900&family=Barlow+Condensed:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f0f0f5; --dark: #0d0d14; --accent: #5b4fff; --accent2: #7c6bff;
+    --text: #111; --sub: #555; --white: #fff; --card: #fff;
+  }
+  body { font-family: 'Barlow', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 60px; background: rgba(240,240,245,.92);
+    backdrop-filter: blur(12px); position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid rgba(91,79,255,.08);
+    box-shadow: 0 2px 20px rgba(0,0,0,.06);
+  }
+  .logo { font-family: 'Barlow Condensed', sans-serif; font-size: 1.7rem; font-weight: 900; text-decoration: none; color: var(--dark); }
+  .logo span { color: var(--accent2); }
+  .nav-links { display: flex; gap: 44px; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--text); font-weight: 500; font-size: 1rem; transition: color .2s; position: relative; padding-bottom: 4px; }
+  .nav-links li.active a { font-weight: 700; color: var(--accent); }
+  .nav-links li.active a::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+  .nav-links a:hover { color: var(--accent); }
+  .btn-nav { background: var(--dark); color: var(--white); border: none; border-radius: 50px; padding: 12px 26px; font-family: 'Barlow', sans-serif; font-size: .9rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background .2s; }
+  .btn-nav:hover { background: var(--accent); }
+
+  /* ── GRID BG ── */
+  .page-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: linear-gradient(rgba(91,79,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(91,79,255,.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: gridShift 20s linear infinite;
+  }
+  @keyframes gridShift { to { background-position: 50px 50px; } }
+
+  /* ── HERO SEARCH SECTION ── */
+  .search-hero {
+    position: relative; z-index: 1;
+    padding: 60px 60px 40px;
+    text-align: center;
+  }
+  .search-eyebrow { font-size: .75rem; font-weight: 700; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 14px; }
+  .search-title { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(2.2rem, 4vw, 3.6rem); font-weight: 900; color: var(--dark); margin-bottom: 8px; }
+  .search-title span { color: var(--accent2); }
+  .search-sub { font-size: 1rem; color: var(--sub); margin-bottom: 32px; }
+
+  .search-bar {
+    display: flex; align-items: center; gap: 0;
+    max-width: 620px; margin: 0 auto 32px;
+    background: var(--white); border-radius: 50px;
+    border: 2px solid rgba(91,79,255,.15);
+    box-shadow: 0 8px 30px rgba(91,79,255,.12);
+    overflow: hidden; transition: border-color .2s, box-shadow .2s;
+  }
+  .search-bar:focus-within { border-color: var(--accent); box-shadow: 0 8px 40px rgba(91,79,255,.22); }
+  .search-bar input {
+    flex: 1; border: none; outline: none; padding: 16px 24px;
+    font-family: 'Barlow', sans-serif; font-size: 1rem; background: transparent; color: var(--dark);
+  }
+  .search-bar input::placeholder { color: #aaa; }
+  .search-btn {
+    background: var(--accent); color: var(--white); border: none;
+    padding: 14px 28px; font-family: 'Barlow', sans-serif; font-weight: 700; font-size: .95rem;
+    cursor: pointer; border-radius: 0 50px 50px 0; transition: background .2s;
+    white-space: nowrap;
+  }
+  .search-btn:hover { background: var(--dark); }
+
+  /* ── FILTERS ── */
+  .filters {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 10px; max-width: 900px; margin: 0 auto;
+  }
+  .filter-label { font-size: .8rem; font-weight: 700; color: #888; letter-spacing: 1px; text-transform: uppercase; margin-right: 6px; }
+  .filter-btn {
+    padding: 8px 18px; border-radius: 50px; border: 1.5px solid rgba(91,79,255,.2);
+    background: var(--white); font-family: 'Barlow', sans-serif; font-size: .85rem; font-weight: 600;
+    color: var(--sub); cursor: pointer; transition: all .2s;
+  }
+  .filter-btn:hover, .filter-btn.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 60px 24px; position: relative; z-index: 1;
+  }
+  .stats-count { font-size: .9rem; color: var(--sub); }
+  .stats-count strong { color: var(--dark); }
+  .sort-select {
+    padding: 8px 16px; border-radius: 10px; border: 1.5px solid rgba(91,79,255,.15);
+    background: var(--white); font-family: 'Barlow', sans-serif; font-size: .88rem;
+    color: var(--dark); cursor: pointer; outline: none;
+  }
+
+  /* ── GAMES GRID ── */
+  .games-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px; padding: 0 60px 80px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── GAME CARD ── */
+  .game-card {
+    background: var(--card); border-radius: 20px;
+    border: 1px solid rgba(91,79,255,.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+    overflow: hidden; cursor: pointer;
+    transition: transform .25s, box-shadow .25s, border-color .25s;
+    position: relative;
+    animation: cardIn .4s ease both;
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  .game-card:hover { transform: translateY(-6px); box-shadow: 0 16px 50px rgba(91,79,255,.18); border-color: rgba(91,79,255,.28); }
+
+  .card-rank {
+    position: absolute; top: 14px; left: 14px; z-index: 2;
+    background: rgba(13,13,20,.85); color: #fff;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 1rem; font-weight: 900;
+    padding: 4px 12px; border-radius: 8px; backdrop-filter: blur(4px);
+    letter-spacing: .5px;
+  }
+  .card-rank.gold   { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .card-rank.silver { background: linear-gradient(135deg, #94a3b8, #64748b); }
+  .card-rank.bronze { background: linear-gradient(135deg, #b45309, #92400e); }
+
+  .card-genre-tag {
+    position: absolute; top: 14px; right: 14px; z-index: 2;
+    background: rgba(91,79,255,.12); color: var(--accent);
+    font-size: .7rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(91,79,255,.2);
+    backdrop-filter: blur(4px);
+  }
+
+  .card-visual {
+    height: 200px; display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden; background: #0d0d14;
+  }
+  .card-img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center top;
+    transition: transform .4s ease, filter .4s ease;
+    display: block;
+  }
+  .game-card:hover .card-img { transform: scale(1.07); filter: brightness(1.08); }
+  .card-img-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13,13,20,.7) 0%, transparent 50%);
+    z-index: 1; transition: opacity .3s;
+  }
+  .game-card:hover .card-img-overlay { opacity: .6; }
+  .card-glow {
+    position: absolute; inset: 0; z-index: 2;
+    background: radial-gradient(circle at center, var(--glow-color, rgba(91,79,255,.08)) 0%, transparent 70%);
+    opacity: 0; transition: opacity .3s;
+  }
+  .game-card:hover .card-glow { opacity: 1; }
+  /* fallback emoji shown when img fails */
+  .card-emoji-fallback {
+    font-size: 4rem; position: absolute; z-index: 0;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,.3));
+    opacity: .7;
+  }
+
+  .card-body { padding: 18px 20px 20px; }
+  .card-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.35rem; font-weight: 900; color: var(--dark); margin-bottom: 4px; line-height: 1.1; }
+  .card-dev { font-size: .78rem; color: #999; font-weight: 500; margin-bottom: 10px; }
+
+  .card-meta { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .card-year { font-size: .82rem; font-weight: 600; color: var(--sub); }
+  .card-rating { display: flex; align-items: center; gap: 4px; font-size: .82rem; font-weight: 700; color: #f59e0b; }
+
+  .card-platforms { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .platform-tag {
+    padding: 3px 10px; border-radius: 6px; font-size: .7rem; font-weight: 700;
+    letter-spacing: .5px; text-transform: uppercase;
+  }
+  .pt-ps    { background: #e8f0fe; color: #1a56db; }
+  .pt-xbox  { background: #e8fdf0; color: #057a55; }
+  .pt-pc    { background: #fdf2e8; color: #c05621; }
+  .pt-sw    { background: #fde8e8; color: #c81e1e; }
+  .pt-multi { background: #f3e8fd; color: #7e3af2; }
+  .pt-mob   { background: #e8fdf9; color: #0694a2; }
+
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .card-score {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; font-weight: 900;
+  }
+  .score-bar { width: 60px; height: 5px; background: rgba(91,79,255,.12); border-radius: 10px; overflow: hidden; }
+  .score-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #a78bfa); border-radius: 10px; }
+  .card-cta {
+    font-size: .8rem; font-weight: 700; color: var(--accent); text-decoration: none;
+    display: flex; align-items: center; gap: 4px; transition: gap .2s;
+  }
+  .game-card:hover .card-cta { gap: 8px; }
+
+  /* ── FEATURED CARD (top 3) ── */
+  .game-card.featured { grid-column: span 1; }
+  .game-card.featured .card-visual { height: 200px; }
+
+  /* ── LOAD MORE ── */
+  .load-more-wrap { text-align: center; padding-bottom: 60px; position: relative; z-index: 1; }
+  .btn-load {
+    background: var(--white); color: var(--accent); border: 2px solid rgba(91,79,255,.25);
+    border-radius: 50px; padding: 14px 36px;
+    font-family: 'Barlow', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 4px 16px rgba(91,79,255,.1);
+  }
+  .btn-load:hover { background: var(--accent); color: var(--white); }
+
+  /* ── FLOATING PARTICLES ── */
+  .particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .particle { position: absolute; border-radius: 2px; animation: floatP linear infinite; }
+  @keyframes floatP { 0% { transform: rotate(45deg) translateY(0); opacity: .6; } 100% { transform: rotate(45deg) translateY(-120px); opacity: 0; } }
+
+  /* ── NO RESULTS ── */
+  .no-results { text-align: center; padding: 60px; color: var(--sub); display: none; grid-column: 1/-1; }
+  .no-results.show { display: block; }
+  .no-results h3 { font-size: 1.4rem; margin-bottom: 8px; color: var(--dark); }
+</style>
+</head>
+<body>
+
+<div class="page-bg"></div>
+<div class="particles" id="particles"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">GAME<span>VERSE</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li class="active"><a href="games.html">Games</a></li>
+    <li><a href="#">Platforms</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <a href="games.html" class="btn-nav">Explore Games</a>
+</nav>
+
+<!-- SEARCH HERO -->
+<section class="search-hero">
+  <p class="search-eyebrow">The Ultimate Archive</p>
+  <h1 class="search-title">All-Time <span>Greatest</span> Games</h1>
+  <p class="search-sub">Ranked by legacy, impact & cultural significance across all platforms</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search games, developers, genres…" />
+    <button class="search-btn" onclick="doSearch()">Search</button>
+  </div>
+  <div class="filters">
+    <span class="filter-label">Platform:</span>
+    <button class="filter-btn active" onclick="filterPlatform('all', this)">All</button>
+    <button class="filter-btn" onclick="filterPlatform('PS', this)">PlayStation</button>
+    <button class="filter-btn" onclick="filterPlatform('Xbox', this)">Xbox</button>
+    <button class="filter-btn" onclick="filterPlatform('PC', this)">PC</button>
+    <button class="filter-btn" onclick="filterPlatform('Switch', this)">Switch</button>
+    <button class="filter-btn" onclick="filterPlatform('Mobile', this)">Mobile</button>
+  </div>
+</section>
+
+<!-- STATS ROW -->
+<div class="stats-row">
+  <p class="stats-count">Showing <strong id="countDisplay">30</strong> legendary games</p>
+  <select class="sort-select" onchange="sortGames(this.value)">
+    <option value="rank">Sort by Rank</option>
+    <option value="year-new">Newest First</option>
+    <option value="year-old">Oldest First</option>
+    <option value="rating">Highest Rated</option>
+    <option value="az">A – Z</option>
+  </select>
+</div>
+
+<!-- GAMES GRID -->
+<div class="games-grid" id="gamesGrid"></div>
+<div class="load-more-wrap"><button class="btn-load" onclick="loadMore()">Load More Games</button></div>
+
+<script>
+// ── GAME DATA ──
+const GAMES = [
+  { id:'gta5', rank:1, title:'Grand Theft Auto V', dev:'Rockstar Games', year:2013, genre:'Action', rating:9.8, score:98, platforms:['PS','Xbox','PC'], img:'https://wallpapercave.com/wp/wp1809630.jpg', glow:'rgba(239,68,68,.15)', desc:'Open-world crime masterpiece' },
+  { id:'minecraft', rank:2, title:'Minecraft', dev:'Mojang Studios', year:2011, genre:'Sandbox', rating:9.7, score:97, platforms:['PC','Xbox','PS','Switch','Mobile'], img:'https://i.ytimg.com/vi/xvTuYsAKoLo/maxresdefault.jpg', glow:'rgba(34,197,94,.15)', desc:'Infinite creativity sandbox' },
+  { id:'zelda-botw', rank:3, title:'The Legend of Zelda: BotW', dev:'Nintendo', year:2017, genre:'Adventure', rating:9.7, score:97, platforms:['Switch'], img:'https://www.nintendo.com/eu/media/images/10_share_images/games_15/wiiu_14/SI_WiiU_TheLegendOfZeldaBreathOfTheWild_image1600w.jpg', glow:'rgba(234,179,8,.15)', desc:'Redefining open-world adventure' },
+  { id:'red-dead-2', rank:4, title:'Red Dead Redemption 2', dev:'Rockstar Games', year:2018, genre:'Action', rating:9.6, score:96, platforms:['PS','Xbox','PC'], img:'https://i.ytimg.com/vi/SXvQ1nK4oxk/maxresdefault.jpg', glow:'rgba(180,83,9,.15)', desc:'Epic western narrative masterpiece' },
+  { id:'god-of-war', rank:5, title:'God of War (2018)', dev:'Santa Monica Studio', year:2018, genre:'Action-RPG', rating:9.6, score:96, platforms:['PS','PC'], img:'https://wallpapercave.com/wp/wp2680103.jpg', glow:'rgba(239,68,68,.15)', desc:'Kratos reborn — father & warrior' },
+  { id:'tlou2', rank:6, title:'The Last of Us Part II', dev:'Naughty Dog', year:2020, genre:'Action', rating:9.3, score:93, platforms:['PS'], img:'https://image.api.playstation.com/vulcan/ap/rnd/202312/0117/da083fa5e19458dd750aa8a6ea30ba10bac6f87074693df5.jpg', glow:'rgba(34,197,94,.15)', desc:'A brutal, emotional masterwork' },
+  { id:'elden-ring', rank:7, title:'Elden Ring', dev:'FromSoftware', year:2022, genre:'Action-RPG', rating:9.6, score:96, platforms:['PS','Xbox','PC'], img:'https://flowgames.gg/wp-content/uploads/2023/07/9edf816d-5625-45d2-9ef6-8b2ae65bb7eaCover_Elder-Ring.webp', glow:'rgba(251,191,36,.15)', desc:'Vast dark fantasy open world' },
+  { id:'witcher3', rank:8, title:'The Witcher 3', dev:'CD Projekt Red', year:2015, genre:'RPG', rating:9.5, score:95, platforms:['PS','Xbox','PC','Switch'], img:'https://images.gog-statics.com/ca20a040b7e7dbf11f954b4fa85e1ecdcf8f95eeba8ebf71f89455794eec80f2.jpg', glow:'rgba(91,79,255,.15)', desc:'The pinnacle of open-world RPG' },
+  { id:'fortnite', rank:9, title:'Fortnite', dev:'Epic Games', year:2017, genre:'Battle Royale', rating:8.5, score:85, platforms:['PS','Xbox','PC','Switch','Mobile'], img:'https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/06/fornite_splash_image.jpg', glow:'rgba(56,189,248,.15)', desc:'Cultural phenomenon battle royale' },
+  { id:'halo-ce', rank:10, title:'Halo: Combat Evolved', dev:'Bungie', year:2001, genre:'FPS', rating:9.4, score:94, platforms:['Xbox','PC'], img:'https://static1.srcdn.com/wordpress/wp-content/uploads/2020/03/Halo-Combat-Evolved-.jpg', glow:'rgba(34,197,94,.15)', desc:'Defined console first-person shooters' },
+  { id:'mario-odyssey', rank:11, title:'Super Mario Odyssey', dev:'Nintendo', year:2017, genre:'Platformer', rating:9.4, score:94, platforms:['Switch'], img:'https://samurai-gamers.com/wp-content/uploads/2017/10/sg-super-mario-odyssey-walkthrough-and-guide.jpg', glow:'rgba(234,179,8,.15)', desc:'Mario at his absolute finest' },
+  { id:'pubg', rank:12, title:'PUBG: Battlegrounds', dev:'Krafton', year:2017, genre:'Battle Royale', rating:8.2, score:82, platforms:['PS','Xbox','PC','Mobile'], img:'https://wstatic-prod.pubg.com/web/live/static/og/img-og-pubg.jpg', glow:'rgba(217,119,6,.15)', desc:'Pioneer of the battle royale genre' },
+  { id:'dark-souls', rank:13, title:'Dark Souls', dev:'FromSoftware', year:2011, genre:'Action-RPG', rating:9.3, score:93, platforms:['PS','Xbox','PC'], img:'https://upload.wikimedia.org/wikipedia/en/8/8d/Dark_Souls_Cover_Art.jpg', glow:'rgba(71,85,105,.15)', desc:'Spawned a generation of challenge games' },
+  { id:'cyberpunk', rank:14, title:'Cyberpunk 2077', dev:'CD Projekt Red', year:2020, genre:'Action-RPG', rating:8.7, score:87, platforms:['PS','Xbox','PC'], img:'https://wallpapers.com/images/hd/cyberpunk-2077-s-megacity-5120x1440-gaming-orf4szuc1q3lmad5.jpg', glow:'rgba(251,191,36,.15)', desc:'Night City finally fulfilled its promise' },
+  { id:'sekiro', rank:15, title:'Sekiro: Shadows Die Twice', dev:'FromSoftware', year:2019, genre:'Action', rating:9.3, score:93, platforms:['PS','Xbox','PC'], img:'https://www.allkeyshop.com/blog/wp-content/uploads/sekiro-shadows-die-twice-banner2.jpg', glow:'rgba(239,68,68,.15)', desc:'Precision combat perfected in feudal Japan' },
+  { id:'cod-mw2', rank:16, title:'Call of Duty: Modern Warfare 2', dev:'Infinity Ward', year:2009, genre:'FPS', rating:9.0, score:90, platforms:['PS','Xbox','PC'], img:'https://images.hdqwalls.com/wallpapers/call-of-duty-modern-warfare-2-campaign-remastered-4k-vw.jpg', glow:'rgba(71,85,105,.15)', desc:'Iconic multiplayer & unforgettable campaign' },
+  { id:'overwatch', rank:17, title:'Overwatch', dev:'Blizzard Entertainment', year:2016, genre:'FPS', rating:8.8, score:88, platforms:['PS','Xbox','PC'], img:'https://images4.alphacoders.com/553/thumb-1920-553496.jpg', glow:'rgba(251,146,60,.15)', desc:'Revived team-based shooters globally' },
+  { id:'league', rank:18, title:'League of Legends', dev:'Riot Games', year:2009, genre:'MOBA', rating:8.5, score:85, platforms:['PC'], img:'https://images8.alphacoders.com/406/406806.png', glow:'rgba(251,191,36,.15)', desc:"World's most played PC game" },
+  { id:'hollow-knight', rank:19, title:'Hollow Knight', dev:'Team Cherry', year:2017, genre:'Metroidvania', rating:9.1, score:91, platforms:['PC','Switch','PS','Xbox'], img:'https://gamefreaks365.com/wp-content/uploads/2022/11/Hollow-Knight-cover-art-lore.jpg', glow:'rgba(91,79,255,.15)', desc:'Indie masterpiece of atmosphere & challenge' },
+  { id:'among-us', rank:20, title:'Among Us', dev:'InnerSloth', year:2018, genre:'Social Deduction', rating:8.0, score:80, platforms:['PC','Mobile','Switch'], img:'https://gamingbolt.com/wp-content/uploads/2020/09/Among-Us.jpg', glow:'rgba(239,68,68,.15)', desc:'Pandemic social phenomenon worldwide' },
+  { id:'ff7', rank:21, title:'Final Fantasy VII', dev:'Square', year:1997, genre:'RPG', rating:9.5, score:95, platforms:['PS','PC'], img:'https://wallpapercave.com/wp/4Z9eXRH.jpg', glow:'rgba(56,189,248,.15)', desc:'Changed RPGs and gaming storytelling forever' },
+  { id:'half-life2', rank:22, title:'Half-Life 2', dev:'Valve', year:2004, genre:'FPS', rating:9.6, score:96, platforms:['PC'], img:'https://cdn.neowin.com/news/images/uploaded/2024/11/1731709897_hl2wallpaper02_16x9.jpg', glow:'rgba(34,197,94,.15)', desc:'Narrative FPS perfection with gravity gun' },
+  { id:'mario-kart8', rank:23, title:'Mario Kart 8 Deluxe', dev:'Nintendo', year:2017, genre:'Racing', rating:9.2, score:92, platforms:['Switch'], img:'https://img-eshop.cdn.nintendo.net/i/c6746200f54a1b6f2626f0ccf911d94a57f98bfc1d06b158b59c32d8e13df9b2.jpg', glow:'rgba(234,179,8,.15)', desc:'Best-selling Switch game of all time' },
+  { id:'gtasan', rank:24, title:'GTA: San Andreas', dev:'Rockstar Games', year:2004, genre:'Action', rating:9.4, score:94, platforms:['PS','Xbox','PC'], img:'https://wallpaperaccess.com/full/3662276.jpg', glow:'rgba(34,197,94,.15)', desc:'Open-world storytelling at its peak' },
+  { id:'doom-eternal', rank:25, title:'DOOM Eternal', dev:'id Software', year:2020, genre:'FPS', rating:9.0, score:90, platforms:['PS','Xbox','PC','Switch'], img:'https://images.bauerhosting.com/legacy/media/5e70/f8b3/03ea/cb7b/8410/ac3d/doom-eternal-hero.jpg?ar=16:9&fit=crop&crop=top&auto=format&w=1440&q=80', glow:'rgba(239,68,68,.15)', desc:'The fastest, most metal shooter ever' },
+  { id:'portal2', rank:26, title:'Portal 2', dev:'Valve', year:2011, genre:'Puzzle', rating:9.5, score:95, platforms:['PC','PS','Xbox'], img:'https://wallpapercave.com/wp/wp2963879.jpg', glow:'rgba(91,79,255,.15)', desc:'Perfection in puzzle design & comedy' },
+  { id:'tlou1', rank:27, title:'The Last of Us', dev:'Naughty Dog', year:2013, genre:'Action', rating:9.5, score:95, platforms:['PS','PC'], img:'https://www.menaredelicious.com/wp-content/uploads/2012/05/The-last-of-us-Naughty-Dog-cover.jpeg', glow:'rgba(34,197,94,.15)', desc:'Emotional storytelling redefined in games' },
+  { id:'ac-odyssey', rank:28, title:"Assassin's Creed: Odyssey", dev:'Ubisoft', year:2018, genre:'Action-RPG', rating:8.5, score:85, platforms:['PS','Xbox','PC'], img:'https://wallpaperaccess.com/full/1110180.jpg', glow:'rgba(56,189,248,.15)', desc:'Epic Greek odyssey in open world' },
+  { id:'bloodborne', rank:29, title:'Bloodborne', dev:'FromSoftware', year:2015, genre:'Action-RPG', rating:9.2, score:92, platforms:['PS'], img:'https://static0.gamerantimages.com/wordpress/wp-content/uploads/2023/02/0_0007_bloodborne.jpg', glow:'rgba(220,38,38,.15)', desc:'Gothic horror masterwork for PS4' },
+  { id:'fifa23', rank:30, title:'FIFA Series', dev:'EA Sports', year:2023, genre:'Sports', rating:7.8, score:78, platforms:['PS','Xbox','PC','Switch','Mobile'], img:'https://cdn1.epicgames.com/offer/f5deacee017b4b109476933f7dd2edbd/EGS_EASPORTSFIFA23StandardEdition_EACanada_S1_2560x1440-aaf9c5273c27a485f2cce8cb7e804f5c', glow:'rgba(34,197,94,.15)', desc:"World's most popular sports franchise" },
+];
+
+const PLATFORM_MAP = { PS:'pt-ps', Xbox:'pt-xbox', PC:'pt-pc', Switch:'pt-sw', Mobile:'pt-mob' };
+
+let currentFilter = 'all';
+let currentSort = 'rank';
+let visibleCount = 30;
+let filteredGames = [...GAMES];
+
+function getRankClass(r) {
+  if (r === 1) return 'gold';
+  if (r === 2) return 'silver';
+  if (r === 3) return 'bronze';
+  return '';
+}
+
+function buildCard(g, delay) {
+  const platforms = g.platforms.map(p => `<span class="platform-tag ${PLATFORM_MAP[p]||'pt-multi'}">${p}</span>`).join('');
+  const scoreW = g.score;
+  const rankClass = getRankClass(g.rank);
+  return `
+    <div class="game-card${g.rank<=3?' featured':''}" onclick="openGame('${g.id}')" style="animation-delay:${delay}ms">
+      <div class="card-rank ${rankClass}">#${g.rank}</div>
+      <div class="card-genre-tag">${g.genre}</div>
+      <div class="card-visual">
+        <img class="card-img" src="${g.img}" alt="${g.title}"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+        <div class="card-img-fallback" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:4rem;background:linear-gradient(135deg,rgba(240,240,250,.8),rgba(220,220,240,.9))">${g.emoji||'🎮'}</div>
+        <div class="card-img-overlay"></div>
+        <div class="card-glow" style="--glow-color:${g.glow}"></div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${g.title}</div>
+        <div class="card-dev">${g.dev}</div>
+        <div class="card-meta">
+          <span class="card-year">📅 ${g.year}</span>
+          <span class="card-rating">⭐ ${g.rating}</span>
+        </div>
+        <div class="card-platforms">${platforms}</div>
+        <div class="card-footer">
+          <div class="card-score">
+            <span style="font-size:.75rem;color:#888;font-weight:600">Score</span>
+            <div class="score-bar"><div class="score-fill" style="width:${scoreW}%"></div></div>
+            <span style="color:var(--accent)">${g.score}</span>
+          </div>
+          <span class="card-cta">View Details →</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGames() {
+  const grid = document.getElementById('gamesGrid');
+  const toShow = filteredGames.slice(0, visibleCount);
+  document.getElementById('countDisplay').textContent = filteredGames.length;
+  if (toShow.length === 0) {
+    grid.innerHTML = '<div class="no-results show"><h3>No games found</h3><p>Try a different search or filter.</p></div>';
+    return;
+  }
+  grid.innerHTML = toShow.map((g, i) => buildCard(g, i * 30)).join('');
+}
+
+function filterPlatform(platform, btn) {
+  currentFilter = platform;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function doSearch() {
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  filteredGames = GAMES.filter(g => {
+    const matchSearch = !q || g.title.toLowerCase().includes(q) || g.dev.toLowerCase().includes(q) || g.genre.toLowerCase().includes(q);
+    const matchPlatform = currentFilter === 'all' || g.platforms.includes(currentFilter);
+    return matchSearch && matchPlatform;
+  });
+  sortGames(currentSort, false);
+}
+
+function sortGames(val, rerender = true) {
+  currentSort = val;
+  if (val === 'rank')     filteredGames.sort((a,b) => a.rank - b.rank);
+  if (val === 'year-new') filteredGames.sort((a,b) => b.year - a.year);
+  if (val === 'year-old') filteredGames.sort((a,b) => a.year - b.year);
+  if (val === 'rating')   filteredGames.sort((a,b) => b.rating - a.rating);
+  if (val === 'az')       filteredGames.sort((a,b) => a.title.localeCompare(b.title));
+  if (rerender) renderGames();
+  else renderGames();
+}
+
+function loadMore() { visibleCount += 10; renderGames(); }
+
+function openGame(id) {
+  window.location.href = `game-detail.html?id=${id}`;
+}
+
+// Search on enter
+document.getElementById('searchInput').addEventListener('keyup', e => { if (e.key === 'Enter') doSearch(); });
+document.getElementById('searchInput').addEventListener('input', () => applyFilters());
+
+// Particles
+const pc = document.getElementById('particles');
+for (let i = 0; i < 16; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  const s = Math.random()*8+4;
+  p.style.cssText = `width:${s}px;height:${s}px;left:${Math.random()*100}%;top:${Math.random()*100}%;background:rgba(91,79,255,${.05+Math.random()*.12});animation-duration:${4+Math.random()*5}s;animation-delay:${Math.random()*5}s;`;
+  pc.appendChild(p);
+}
+
+renderGames();
+</script>
+</body>
+</html>
